@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#030814">
+  <title>Codevember 2026 / 02 / Shatter</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="style.css">
+  <script type="importmap">
+    { "imports": {
+      "box3d.js/inline": "https://cdn.jsdelivr.net/npm/box3d.js@0.1.1/dist/box3d.inline.mjs",
+      "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+      "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+      "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.tsl.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+    } }
+  </script>
+</head>
+<body>
+  <main aria-label="Glass primitives falling and shattering"><canvas aria-label="Click to drop the next glass primitive. Drag to orbit."></canvas></main>
+  <header><span>CODEVEMBER 2026 / 02 / SHATTER</span><p>Click or Enter to drop · Drag to orbit · Space to pause</p></header>
+  <div id="status" role="status">Preparing glass…</div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
