@@ -13,6 +13,18 @@ const centerOfMass = body => readVector(b3.b3Body_GetWorldCenterOfMass, body, 1 
 const linearVelocity = body => readVector(b3.b3Body_GetLinearVelocity, body, 1 / SCALE);
 const angularVelocity = body => readVector(b3.b3Body_GetAngularVelocity, body);
 
+function angularMomentumAbout(body, point) {
+  const rotation = new THREE.Quaternion().fromArray(b3.b3Body_GetRotation(q, body.id));
+  const omega = angularVelocity(body).applyQuaternion(rotation.clone().invert());
+  const { cx, cy, cz } = body.inertia;
+  const momentum = new THREE.Vector3(
+    cx[0] * omega.x + cy[0] * omega.y + cz[0] * omega.z,
+    cx[1] * omega.x + cy[1] * omega.y + cz[1] * omega.z,
+    cx[2] * omega.x + cy[2] * omega.y + cz[2] * omega.z
+  ).applyQuaternion(rotation);
+  return momentum.add(centerOfMass(body).sub(point).cross(linearVelocity(body).multiplyScalar(body.mass)));
+}
+
 export function kineticEnergy(body) {
   const rotation = new THREE.Quaternion().fromArray(b3.b3Body_GetRotation(q, body.id));
   const omega = angularVelocity(body).applyQuaternion(rotation.invert());
@@ -68,6 +80,7 @@ export class ShatterSimulation {
     b3.b3Body_SetLinearVelocity(body.id, velocity.toArray().map(n => n * SCALE)); b3.b3Body_SetAngularVelocity(body.id, angular.toArray());
   }
   addColliders(body, fragment, offset = new THREE.Vector3(), intact = null) {
+    const first = body.colliders.length;
     const def = b3.b3DefaultShapeDef(); def.density = DENSITY / SCALE ** 3;
     def.baseMaterial.friction = 0.52; def.baseMaterial.restitution = 0.16;
     def.enableHitEvents = !!intact; def.enableContactEvents = true; def.updateBodyMass = false;
@@ -82,22 +95,25 @@ export class ShatterSimulation {
       body.colliders.push(collider); this.dynamicShapes.add(idKey(collider));
       if (intact) this.intactColliders.set(idKey(collider), intact);
     }
+    return body.colliders.slice(first);
   }
-  drop(shards, { height = 5.8, spread = 0.22, toughness = 1.2, x = 0, z = 0, rotation = null, angularVelocity = null } = {}) {
+  drop(shards, { height = 5.8, spread = 0.22, toughness = 1.2, fractureDelay = 0.002, x = 0, z = 0, rotation = null, angularVelocity = null } = {}) {
     const random = randomGenerator(++this.serial * 1237);
     const body = {
       position: new THREE.Vector3(x, height, z), quaternion: new THREE.Quaternion().setFromEuler(rotation || new THREE.Euler(random() * 0.65, random() * 2, random() * 0.65)),
       velocity: new THREE.Vector3((random() - 0.5) * 0.5, -0.3, (random() - 0.5) * 0.5), angular: angularVelocity ? angularVelocity.clone() : new THREE.Vector3(0.22, 0.3, -0.15),
-      broken: false, age: 0, spread: THREE.MathUtils.clamp(spread, 0, 0.5), toughness,
-      fragments: shards.map(s => ({ ...s, position: new THREE.Vector3(), quaternion: new THREE.Quaternion(), velocity: new THREE.Vector3(), angular: new THREE.Vector3(), sleeping: false }))
+      broken: false, fracturing: false, age: 0, spread: THREE.MathUtils.clamp(spread, 0, 0.5), toughness,
+      fractureDelay: THREE.MathUtils.clamp(fractureDelay, 0, 0.5),
+      fragments: shards.map(s => ({ ...s, position: new THREE.Vector3(), quaternion: new THREE.Quaternion(), velocity: new THREE.Vector3(), angular: new THREE.Vector3(), sleeping: false, released: false, rigidBody: null }))
     };
     body.rigidBody = this.createBody(body.position, body.quaternion);
-    for (const f of body.fragments) this.addColliders(body.rigidBody, f, f.center, body);
+    for (const f of body.fragments) f.attachedColliders = this.addColliders(body.rigidBody, f, f.center, body);
     this.applyMass(body.rigidBody); this.setVelocity(body.rigidBody, body.velocity, body.angular);
     this.bodies.push(body); this.placeIntact(body); return body;
   }
   placeIntact(body) {
     for (const f of body.fragments) {
+      if (f.released) continue;
       f.position.copy(f.center).applyQuaternion(body.quaternion).add(body.position); f.quaternion.copy(body.quaternion);
     }
   }
@@ -152,37 +168,92 @@ export class ShatterSimulation {
     b3.b3DestroyBody(body.id);
   }
   break(body, point) {
+    if (body.broken) return;
     const parent = body.rigidBody;
-    const postEnergy = kineticEnergy(parent), com = centerOfMass(parent);
-    const velocity = linearVelocity(parent), omega = angularVelocity(parent), mass = parent.mass;
-    body.broken = true; body.brokenAt = this.time; body.impactPoint = point;
+    const postEnergy = kineticEnergy(parent);
+    body.broken = true; body.fracturing = true; body.brokenAt = this.time; body.impactPoint = point.clone();
     this.readRigidBody(body); this.placeIntact(body);
-    this.destroyBody(parent); body.rigidBody = null;
-    let totalMass = 0; const mean = new THREE.Vector3();
     for (const f of body.fragments) {
+      // Freeze the order in world space at impact; later tumbling cannot
+      // reverse the wave or postpone a fragment that was already scheduled.
+      f.impactHeight = f.position.y;
+    }
+    const low = Math.min(...body.fragments.map(f => f.impactHeight));
+    const high = Math.max(...body.fragments.map(f => f.impactHeight));
+    for (const f of body.fragments) {
+      f.releaseAt = this.time + (high - low > 1e-6 ? (f.impactHeight - low) / (high - low) * body.fractureDelay : 0);
+    }
+    body.fractureStats = { massBefore: parent.mass, massAfter: 0,
+      releaseBudget: Math.max(0, body.preImpactEnergy - postEnergy) * body.spread,
+      releasedEnergy: 0, releases: [] };
+    this.releaseFragments(body);
+    this.onImpact(body);
+  }
+  releaseFragments(body) {
+    const batch = body.fragments.filter(f => !f.released && f.releaseAt <= this.time + 1e-10);
+    if (!batch.length) return;
+    const parent = body.rigidBody, stats = body.fractureStats;
+    const energyBefore = kineticEnergy(parent), com = centerOfMass(parent);
+    const velocity = linearVelocity(parent), omega = angularVelocity(parent), massBefore = parent.mass;
+    const angularMomentumBefore = angularMomentumAbout(parent, com);
+    this.readRigidBody(body); this.placeIntact(body);
+    // Detach actual collider volumes. The remaining compound keeps its
+    // collisions, inertia, and motion throughout the propagation interval.
+    const detached = new Set();
+    for (const f of batch) {
+      for (const collider of f.attachedColliders) {
+        const key = idKey(collider);
+        detached.add(key); this.intactColliders.delete(key); this.dynamicShapes.delete(key);
+        b3.b3DestroyShape(collider, false);
+      }
+      f.attachedColliders = [];
+    }
+    parent.colliders = parent.colliders.filter(collider => !detached.has(idKey(collider)));
+    const parts = [];
+    if (parent.colliders.length) {
+      this.applyMass(parent);
+      parts.push({ rigidBody: parent, release: new THREE.Vector3() });
+    } else {
+      this.destroyBody(parent); body.rigidBody = null;
+      body.fracturing = false; body.fractureCompletedAt = this.time;
+    }
+    let detachedMass = 0;
+    for (const f of batch) {
       f.rigidBody = this.createBody(f.position, f.quaternion);
       this.addColliders(f.rigidBody, f); this.applyMass(f.rigidBody);
-      // Inherit the intact object's linear and angular motion at each new COM.
+      f.released = true; f.releasedAt = this.time;
+      detachedMass += f.rigidBody.mass;
       const offset = centerOfMass(f.rigidBody).sub(com);
-      f.velocity.copy(velocity).add(omega.clone().cross(offset)); f.angular.copy(omega);
-      // Radial release adds no torque about the COM. Its mass-weighted mean
-      // is removed below to also preserve post-contact linear momentum.
-      f.release = offset.clone().multiplyScalar(1 / Math.max(0.3, offset.length()));
-      totalMass += f.rigidBody.mass; mean.addScaledVector(f.release, f.rigidBody.mass);
+      parts.push({ rigidBody: f.rigidBody, release: offset.clone().multiplyScalar(1 / Math.max(0.3, offset.length())) });
     }
+    let totalMass = 0; const mean = new THREE.Vector3();
+    for (const part of parts) {
+      const offset = centerOfMass(part.rigidBody).sub(com);
+      part.velocity = velocity.clone().add(omega.clone().cross(offset));
+      this.setVelocity(part.rigidBody, part.velocity, omega);
+      totalMass += part.rigidBody.mass; mean.addScaledVector(part.release, part.rigidBody.mass);
+    }
+    // Include the attached remainder in the reaction, preserving linear and
+    // angular momentum at each split rather than injecting an outward kick.
     mean.divideScalar(totalMass);
-    let unitEnergy = 0;
-    for (const f of body.fragments) { f.release.sub(mean); unitEnergy += 0.5 * f.rigidBody.mass * f.release.lengthSq(); }
-    // Separation can spend only part of the energy lost at the actual impact.
-    const releasedEnergy = Math.max(0, body.preImpactEnergy - postEnergy) * body.spread;
-    const speed = unitEnergy > 1e-9 ? Math.sqrt(releasedEnergy / unitEnergy) : 0;
-    for (const f of body.fragments) {
-      f.velocity.addScaledVector(f.release, speed); this.setVelocity(f.rigidBody, f.velocity, f.angular); delete f.release;
+    let unitEnergy = 0, crossEnergy = 0;
+    for (const part of parts) {
+      part.release.sub(mean);
+      unitEnergy += 0.5 * part.rigidBody.mass * part.release.lengthSq();
+      crossEnergy += part.rigidBody.mass * part.velocity.dot(part.release);
     }
-    const momentumAfter = body.fragments.reduce((sum, f) => sum.addScaledVector(linearVelocity(f.rigidBody), f.rigidBody.mass), new THREE.Vector3());
-    body.fractureStats = { momentumBefore: velocity.clone().multiplyScalar(mass), momentumAfter, massBefore: mass, massAfter: totalMass,
-      energyBefore: body.preImpactEnergy, energyAfter: body.fragments.reduce((sum, f) => sum + kineticEnergy(f.rigidBody), 0), releasedEnergy };
-    this.onImpact(body);
+    const allocation = stats.releaseBudget * detachedMass / stats.massBefore;
+    const baseEnergy = parts.reduce((sum, p) => sum + kineticEnergy(p.rigidBody), 0);
+    const available = Math.max(0, Math.min(allocation, energyBefore + allocation - baseEnergy));
+    const speed = unitEnergy > 1e-9 ? Math.max(0, (-crossEnergy + Math.sqrt(crossEnergy ** 2 + 4 * unitEnergy * available)) / (2 * unitEnergy)) : 0;
+    for (const part of parts) this.setVelocity(part.rigidBody, part.velocity.addScaledVector(part.release, speed), omega);
+    const energyAfter = parts.reduce((sum, p) => sum + kineticEnergy(p.rigidBody), 0);
+    const momentumAfter = parts.reduce((sum, p) => sum.addScaledVector(linearVelocity(p.rigidBody), p.rigidBody.mass), new THREE.Vector3());
+    const angularMomentumAfter = parts.reduce((sum, p) => sum.add(angularMomentumAbout(p.rigidBody, com)), new THREE.Vector3());
+    stats.massAfter += detachedMass; stats.releasedEnergy += Math.max(0, energyAfter - baseEnergy);
+    stats.releases.push({ time: this.time, count: batch.length, massBefore, massAfter: totalMass,
+      momentumBefore: velocity.clone().multiplyScalar(massBefore), momentumAfter, angularMomentumBefore, angularMomentumAfter,
+      energyBefore, energyAfter, allocation });
   }
   update(delta) {
     this.accumulator += Math.max(0, Math.min(delta, 0.1));
@@ -194,11 +265,12 @@ export class ShatterSimulation {
     b3.b3World_Step(this.world, STEP, SUBSTEPS); b3.getEvents(this.events, this.world);
     const impacts = new Map();
     for (const body of this.bodies) {
-      if (!body.broken) {
+      if (body.rigidBody) {
         this.readRigidBody(body); this.placeIntact(body);
-        const contact = this.guardFloor(body.rigidBody, body.fragments);
-        if (contact && contact.approachSpeed >= body.toughness) impacts.set(body, contact.point);
-      } else for (const f of body.fragments) {
+        const contact = this.guardFloor(body.rigidBody, body.fragments.filter(f => !f.released));
+        if (!body.broken && contact && contact.approachSpeed >= body.toughness) impacts.set(body, contact.point);
+      }
+      for (const f of body.fragments) if (f.rigidBody) {
         this.readRigidBody(f); this.guardFloor(f.rigidBody, [f]);
       }
     }
@@ -215,13 +287,14 @@ export class ShatterSimulation {
     }
     for (const [body, point] of impacts) this.break(body, point);
     for (const body of this.bodies) {
-      if (!body.broken) { this.readRigidBody(body); this.placeIntact(body); }
-      else for (const f of body.fragments) this.readRigidBody(f);
+      if (body.fracturing) this.releaseFragments(body);
+      if (body.rigidBody) { this.readRigidBody(body); this.placeIntact(body); }
+      for (const f of body.fragments) if (f.rigidBody) this.readRigidBody(f);
     }
   }
   remove(body) {
     if (body.rigidBody) this.destroyBody(body.rigidBody);
-    else for (const f of body.fragments) this.destroyBody(f.rigidBody);
+    for (const f of body.fragments) if (f.rigidBody) this.destroyBody(f.rigidBody);
     const index = this.bodies.indexOf(body); if (index >= 0) this.bodies.splice(index, 1);
   }
   clear() { for (const body of [...this.bodies]) this.remove(body); this.accumulator = 0; this.time = 0; this.serial = 0; this.hadShardContact = false; }

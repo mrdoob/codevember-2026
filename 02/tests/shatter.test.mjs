@@ -84,10 +84,87 @@ test('impact conserves mass and momentum without adding energy; debris collides 
       assert.ok(shardContact, 'no shard-to-shard contact was resolved');
       const stats = body.fractureStats;
       assert.ok(Math.abs(stats.massBefore - stats.massAfter) / stats.massBefore < 1e-5);
-      assert.ok(stats.energyAfter <= stats.energyBefore * 1.00001, 'fracture created kinetic energy');
-      assert.ok(stats.momentumAfter.distanceTo(stats.momentumBefore) / Math.max(1, stats.momentumBefore.length()) < 1e-4, 'fracture changed net momentum');
-      assert.ok(body.fragments.filter(f => f.sleeping).length >= shards.length * 0.85, `${shape}: debris never settled`);
+      assert.ok(stats.releasedEnergy <= stats.releaseBudget * 1.00001 + 1e-5, 'wave exceeded the impact energy budget');
+      // Gravity and contacts act between releases. Check conservation at each
+      // instantaneous split, including the still-attached compound remainder.
+      for (const release of stats.releases) {
+        assert.ok(Math.abs(release.massBefore - release.massAfter) / release.massBefore < 1e-5);
+        assert.ok(release.energyAfter <= (release.energyBefore + release.allocation) * 1.00001 + 1e-5, `${shape}: release created kinetic energy`);
+        assert.ok(release.momentumAfter.distanceTo(release.momentumBefore) / Math.max(1, release.momentumBefore.length()) < 1e-4, `${shape}: release changed net momentum`);
+        assert.ok(release.angularMomentumAfter.distanceTo(release.angularMomentumBefore) / Math.max(1, release.angularMomentumBefore.length()) < 1e-4, `${shape}: release changed angular momentum`);
+      }
+      // A resting shard can belong to an awake contact island. Bound its
+      // surface motion using the solver's 0.05 m/s sleep-speed threshold.
+      const settled = body.fragments.filter(f => f.sleeping || f.velocity.length() + f.angular.length() *
+        (f.geometry.boundingSphere.radius + f.geometry.boundingSphere.center.length()) < 0.05);
+      assert.ok(settled.length >= shards.length * 0.85, `${shape}: debris never settled`);
       assert.ok(Math.min(...body.fragments.map(f => simulation.bottom(f))) > -0.001, `${shape}: resting floor penetration`);
+    } finally { simulation.dispose(); }
+  }
+});
+
+test('fracture propagates bottom to top over 0.05 seconds in impact world space', () => {
+  for (const rotation of [new THREE.Euler(), new THREE.Euler(Math.PI, 0, 0), new THREE.Euler(0.9, 0.5, 0.3)]) {
+    const simulation = new ShatterSimulation();
+    try {
+      const body = simulation.drop(templates.get('Cone'), { rotation, fractureDelay: 0.05 });
+      for (let i = 0; i < 720 && !body.broken; i++) simulation.update(1 / 240);
+      assert.ok(body.broken && body.fracturing);
+      assert.ok(body.fragments.some(f => f.released) && body.fragments.some(f => !f.released));
+      assert.ok(body.rigidBody, 'unreleased fragments must remain a dynamic compound');
+      const colliders = simulation.counts.colliders;
+      for (let step = 0; step < 13; step++) {
+        const released = body.fragments.filter(f => f.released);
+        assert.equal(simulation.counts.bodies, released.length + (body.rigidBody ? 1 : 0));
+        assert.equal(simulation.counts.colliders, colliders, 'a release duplicated or lost collision volume');
+        for (const f of body.fragments.filter(f => !f.released)) {
+          const expected = f.center.clone().applyQuaternion(body.quaternion).add(body.position);
+          assert.ok(f.position.distanceTo(expected) < 1e-9, 'attached fragment drifted from the compound');
+          assert.equal(f.rigidBody, null);
+        }
+        simulation.update(1 / 240);
+      }
+      assert.equal(body.fracturing, false);
+      assert.equal(body.rigidBody, null);
+      const ordered = [...body.fragments].sort((a, b) => a.impactHeight - b.impactHeight);
+      assert.equal(ordered[0].releasedAt, body.brokenAt);
+      for (let i = 1; i < ordered.length; i++) assert.ok(ordered[i].releasedAt >= ordered[i - 1].releasedAt);
+      assert.ok(Math.abs(ordered.at(-1).releasedAt - body.brokenAt - 0.05) <= 1 / 240 + 1e-9);
+    } finally { simulation.dispose(); }
+  }
+});
+
+test('default fast-fracture delay completes within one physics step', () => {
+  const simulation = new ShatterSimulation();
+  try {
+    const body = simulation.drop(templates.get('Cone'));
+    assert.equal(body.fractureDelay, 0.002);
+    for (let i = 0; i < 720 && !body.broken; i++) simulation.update(1 / 240);
+    assert.ok(body.fracturing && body.rigidBody);
+    simulation.update(1 / 240);
+    assert.equal(body.fracturing, false);
+    assert.equal(body.rigidBody, null);
+    assert.ok(body.fragments.every(f => f.released));
+    assert.ok(Math.abs(body.fractureCompletedAt - body.brokenAt - 1 / 240) < 1e-9);
+  } finally { simulation.dispose(); }
+});
+
+test('zero fracture delay releases everything at impact; partial waves clean up all bodies', () => {
+  for (const fractureDelay of [0, 0.05]) {
+    const simulation = new ShatterSimulation();
+    try {
+      const body = simulation.drop(templates.get('Cube'), { fractureDelay });
+      for (let i = 0; i < 720 && !body.broken; i++) simulation.update(1 / 240);
+      assert.ok(body.broken);
+      if (fractureDelay === 0) {
+        assert.equal(body.fractureStats.releases.length, 1);
+        assert.ok(body.fragments.every(f => f.releasedAt === body.brokenAt));
+      } else assert.ok(body.fracturing && body.rigidBody);
+      simulation.remove(body);
+      assert.equal(simulation.counts.bodies, 0);
+      assert.equal(simulation.counts.colliders, 1);
+      assert.equal(simulation.intactColliders.size, 0);
+      assert.equal(simulation.dynamicShapes.size, 0);
     } finally { simulation.dispose(); }
   }
 });

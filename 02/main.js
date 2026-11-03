@@ -26,7 +26,7 @@ try {
   renderer.toneMappingExposure = 1.05;
   await renderer.init();
   const settings = {
-    shape: PRIMITIVES[0], travelSpeed: 1.4, auto: true, cycle: true, speed: 0.65, spread: 0.22, toughness: 1.2, height: 5.8, pause: false,
+    shape: PRIMITIVES[0], travelSpeed: 1.4, auto: true, cycle: true, speed: 0.65, spread: 0.22, toughness: 1.2, fractureDelay: 0.002, height: 5.8, pause: false,
     color: '#ffffff', tint: 1, roughness: 0.1, ior: 1.5, transmission: 1,
     bump: 0.065, absorption: 5, dispersion: 0.008, exposure: 0, quality: 0.65,
     reflections: 1, floorRoughness: 0.22, floorBump: 0.4, contactShading: 1,
@@ -192,7 +192,7 @@ try {
     return true;
   }
   function drop(shape) {
-    if (simulation.bodies.some(body => !body.broken && !body.sleeping)) return false;
+    if (simulation.bodies.some(body => body.fracturing || (!body.broken && !body.sleeping))) return false;
     const explicitShape = shape !== undefined;
     shape ??= settings.cycle ? sequence[sequenceIndex] : settings.shape;
     if (!sequence.includes(shape)) return false;
@@ -201,7 +201,7 @@ try {
     const height = journey.spawnHeight(bounds.radius + bounds.center.length(), settings.height);
     const body = simulation.drop(shards, {
       height, x: journey.launchPoint.x, z: journey.launchPoint.z,
-      spread: settings.spread, toughness: settings.toughness,
+      spread: settings.spread, toughness: settings.toughness, fractureDelay: settings.fractureDelay,
       rotation: new THREE.Euler(THREE.MathUtils.degToRad((Math.random() - 0.5) * 40), 0.35, Math.sin(drops * 2.4) * 0.15),
       angularVelocity: new THREE.Vector3().randomDirection().multiplyScalar(0.8 + Math.random() * 1.6)
     });
@@ -274,6 +274,7 @@ try {
   motion.add(settings, 'speed', 0.1, 1.5, 0.05).name('Time scale');
   motion.add(settings, 'spread', 0, 0.5, 0.01).name('Fracture energy');
   motion.add(settings, 'toughness', 0.2, 6, 0.1).name('Break threshold');
+  motion.add(settings, 'fractureDelay', 0, 0.2, 0.001).name('Fracture delay');
   motion.add(settings, 'height', 3, 8, 0.1).name('Min drop height');
   motion.add({ reset }, 'reset').name('Reset simulation');
   const material = gui.addFolder('Glass');
