@@ -585,8 +585,13 @@ export class GPURopeSimulation {
   async inspect() {
     // Explicit diagnostic only. Animation and pointer motion do not read back
     // particle positions; picking reads just two vec4s when a drag starts.
-    const data = new Float32Array(await this.renderer.getArrayBufferAsync(this.a.value));
-    const state = new Float32Array(await this.renderer.getArrayBufferAsync(this.state.value));
+    const time = this.time;
+    // Queue all copies before yielding, so a feed step cannot change the active
+    // count between the position snapshot and its metadata.
+    const snapshots = await Promise.all(
+      [this.a, this.state, this.normals].map(buffer => this.renderer.getArrayBufferAsync(buffer.value))
+    );
+    const [data, state, materials] = snapshots.map(buffer => new Float32Array(buffer));
     const live = Math.round(state[4]),
       particles = live * this.strands;
     let minY = Infinity,
@@ -605,13 +610,12 @@ export class GPURopeSimulation {
       maxStretch = Math.max(maxStretch, error);
       sumStretch += error;
     }
-    const materials = new Float32Array(await this.renderer.getArrayBufferAsync(this.normals.value));
     let sleeping = 0;
     for (let i = 0; i < this.total; i++)
       if (i % this.count < live && materials[(this.total + i) * 4 + 3] >= SLEEP_TIME - 1e-6) sleeping++;
     return {
       engine: this.engine,
-      time: this.time,
+      time,
       particles,
       capacity: this.total,
       sleeping,

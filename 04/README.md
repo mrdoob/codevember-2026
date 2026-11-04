@@ -49,7 +49,7 @@ npm ci
 npm test
 ```
 
-The twelve Node.js tests cover the CPU fallback and shared geometry: empty-floor startup, growth to capacity, the visible mesh following growth and reset, fixed-step consistency, a full recycling cycle, floor clearance and stretch limits, coincident contacts, grabbing and release, deterministic reset, static floor grip, friction between strands, outward triangle winding, orthonormal yarn frames, fiber tangent directions, and continuous, full-width cuts across recycling events.
+The thirteen Node.js tests cover consistent GPU diagnostic snapshots, the CPU fallback, and shared geometry: empty-floor startup, growth to capacity, the visible mesh following growth and reset, fixed-step consistency, a full recycling cycle, floor clearance and stretch limits, coincident contacts, grabbing and release, deterministic reset, static floor grip, friction between strands, outward triangle winding, orthonormal yarn frames, fiber tangent directions, and continuous, full-width cuts across recycling events.
 
 To check the actual GPU solver in an open WebGPU experiment tab, run:
 
