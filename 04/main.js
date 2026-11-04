@@ -201,7 +201,7 @@ export async function startExperiment() {
     gui = new GUI({ title: 'Settings', width: 244 });
     const motion = gui.addFolder('Tangle');
     motion.add(settings, 'feed', 0, 3, 0.05).name('Yarn feed');
-    motion.add(settings, 'wander', 0, 2, 0.05).name('Wander');
+    motion.add(settings, 'wander', 0, 2, 0.05).name('Feeder orbit');
     motion.add(settings, 'softness', 0, 1, 0.01).name('Softness');
     motion.add(settings, 'friction', 0, 1, 0.01).name('Friction');
     motion.add(settings, 'speed', 0.2, 1.5, 0.05).name('Time scale');

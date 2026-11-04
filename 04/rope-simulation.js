@@ -6,6 +6,8 @@ import {
   CAPACITY,
   INITIAL_COUNT,
   INLET_HEIGHT,
+  INLET_RADIUS,
+  INLET_SPEED,
   DEFAULT_PHYSICS
 } from './rope-config.js';
 
@@ -35,11 +37,10 @@ export class RopeSimulation {
   }
 
   inlet(strand, time, out = [0, 0, 0]) {
-    const a = (strand * Math.PI * 2) / this.strands;
-    const t = time * this.settings.wander;
-    out[0] = 1.45 * Math.cos(a + t * 0.23) + 0.48 * Math.sin(t * 0.71 + a * 2);
+    const angle = (strand * Math.PI * 2) / this.strands + time * this.settings.wander * INLET_SPEED;
+    out[0] = INLET_RADIUS * Math.cos(angle);
     out[1] = INLET_HEIGHT;
-    out[2] = 1.05 * Math.sin(a + t * 0.29) + 0.38 * Math.sin(t * 0.53 + a);
+    out[2] = INLET_RADIUS * Math.sin(angle);
     return out;
   }
 

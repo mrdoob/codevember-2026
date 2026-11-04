@@ -32,6 +32,7 @@ async function beginGesture(app, plan, frame, history) {
   app.camera.updateMatrixWorld();
   const inRegion = y => (plan.region === 'falling' ? y > 1.6 && y < 2.9 : y < 0.65);
   const used = history.slice(-2).map(item => item.strand);
+  const preferredStrand = plan.followPrevious && history.length ? history.at(-1).strand : plan.strand;
   for (let strand = 0; strand < sim.strands; strand++)
     for (let n = 8; n < live - 5; n += 2) {
       const index = strand * sim.count + n,
@@ -44,7 +45,7 @@ async function beginGesture(app, plan, frame, history) {
       if (point.z < 0 || point.z > 1 || x < 110 || x > SIZE - 110 || screenY < 180 || screenY > SIZE - 120) continue;
       const height = Math.abs(y - (plan.pickHeight ?? (plan.region === 'falling' ? 2.1 : 0)));
       const score =
-        (strand === plan.strand ? 0 : 2) +
+        (strand === preferredStrand ? 0 : 2) +
         (used.includes(strand) ? 0.5 : 0) +
         Math.abs(x - SIZE * (plan.focusX ?? 0.5)) / SIZE +
         height +
@@ -127,7 +128,8 @@ export async function captureVideo({
   duration = 60,
   receiver = 'http://localhost:8005',
   interaction = 'regular',
-  seed = 20261104
+  seed = 20261104,
+  interactionCount = null
 } = {}) {
   const app = window.tangle,
     totalFrames = Math.round(duration * FPS);
@@ -138,10 +140,12 @@ export async function captureVideo({
     throw new Error('Set viewport to 1024 × 1024 at device scale 1');
   if (['preparing', 'capturing', 'encoding'].includes(window.captureProgress?.status))
     throw new Error('Capture already running');
-  if (!['regular', 'human'].includes(interaction)) throw new Error('Unknown interaction style');
-  const plans = (interaction === 'human' ? createHumanPlan(duration, seed) : DRAG_PLAN).filter(
-    plan => plan.at + plan.duration < duration
-  );
+  if (!['none', 'regular', 'human'].includes(interaction)) throw new Error('Unknown interaction style');
+  if (interactionCount !== null && interaction !== 'human') throw new Error('Interaction count requires human mode');
+  const schedule =
+    interaction === 'none' ? [] : interaction === 'human' ? createHumanPlan(duration, seed, interactionCount) : DRAG_PLAN;
+  const plans = schedule.filter(plan => plan.at + plan.duration < duration);
+  if (interactionCount !== null && plans.length !== interactionCount) throw new Error('Interaction count does not fit');
   const state = (window.captureProgress = {
     status: 'preparing',
     frame: 0,
@@ -268,6 +272,7 @@ export async function captureVideo({
         warmupFrames: 0,
         initial,
         interaction,
+        interactionCount,
         seed,
         dragPlan: plans,
         camera: {
@@ -276,7 +281,7 @@ export async function captureVideo({
           autoRotateSpeed: controls.autoRotateSpeed
         },
         orbitDegrees: duration * 6 * controls.autoRotateSpeed,
-        method: 'Fixed simulation steps, sequential lossless PNG frames, encoder backpressure, GPU-picked rope gestures'
+        method: 'Fixed simulation steps, sequential lossless PNG frames, encoder backpressure'
       })
     );
     started = true;

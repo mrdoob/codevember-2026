@@ -8,6 +8,8 @@ import {
   INITIAL_COUNT,
   GPU_CAPACITY,
   INLET_HEIGHT,
+  INLET_RADIUS,
+  INLET_SPEED,
   DEFAULT_PHYSICS
 } from './rope-config.js';
 import { yarnSamples, SUBDIVISIONS, LEAD_SAMPLES, LEAD_SPACING, PLY_COUNT, PLY_SIDES } from './yarn-layout.js';
@@ -90,10 +92,8 @@ export class GPURopeSimulation {
     const ptr = 'ptr<storage,array<vec4<f32>>,read_write>';
     const shared = workgroupArray('vec4', TILE);
     const inlet = `
-      let angle=f32(strand)*6.283185307/${f(S)};
-      let t=clock.x*settings.y;
-      let anchor=vec3<f32>(1.45*cos(angle+t*.23)+.48*sin(t*.71+angle*2.0),${f(INLET_HEIGHT)},
-        1.05*sin(angle+t*.29)+.38*sin(t*.53+angle));`;
+      let angle=f32(strand)*6.283185307/${f(S)}+clock.x*settings.y*${f(INLET_SPEED)};
+      let anchor=vec3<f32>(${f(INLET_RADIUS)}*cos(angle),${f(INLET_HEIGHT)},${f(INLET_RADIUS)}*sin(angle));`;
     const floorCode = (point, load, old) => `
       if(${point}.y<=${f(RADIUS)}) {
         ${load}+=${f(RADIUS)}-${point}.y;
@@ -113,7 +113,7 @@ export class GPURopeSimulation {
       if(id<${N}u) {
         let strand=id/${C}u;let local=id%${C}u;let angle=f32(strand)*6.283185307/${f(S)};
         let length=select(0.0,f32(local)*${f(SPACING)},local<${this.initialCount}u);
-        let p=vec4<f32>(1.45*cos(angle)+.48*sin(angle*2.0),${f(INLET_HEIGHT)}-length,1.43*sin(angle),0.0);
+        let p=vec4<f32>(${f(INLET_RADIUS)}*cos(angle),${f(INLET_HEIGHT)}-length,${f(INLET_RADIUS)}*sin(angle),0.0);
         (*a)[id]=p;(*b)[id]=p;(*previous)[id]=p;(*velocity)[id]=vec4<f32>(0.0);
         (*materials)[id]=vec4<f32>(1.0,0.0,0.0,0.0);(*materials)[${N}u+id]=p;(*contacts)[id]=vec4<f32>(0.0);
       }

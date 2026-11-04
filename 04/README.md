@@ -2,7 +2,7 @@
 
 [View experiment](https://mrdoob.github.io/codevember-2026/04/) · [Source](https://github.com/mrdoob/codevember-2026/tree/main/04)
 
-Five wandering strands of yarn feed down onto an empty floor and gradually build a tangled nest. Startup and Reset begin with short hanging lengths; each GPU strand grows to about 194 units before its oldest end is removed. Pick up a thread and pull: the loops lift, tighten, and settle. Static friction and sleeping contacts hold resting yarn against the floor and neighboring strands; a strong pull can still make it slide. Three twisted plies, bump-mapped wool fibers, directional highlights, and wool sheen give each strand its texture. Old yarn ends with a flat cut that retreats smoothly at full thickness.
+Five evenly spaced feeders orbit a shared circle, dropping yarn onto an empty floor and gradually building a tangled nest. Startup and Reset begin with short hanging lengths; each GPU strand grows to about 194 units before its oldest end is removed. Pick up a thread and pull: the loops lift, tighten, and settle. Static friction and sleeping contacts hold resting yarn against the floor and neighboring strands; a strong pull can still make it slide. Three twisted plies, bump-mapped wool fibers, directional highlights, and wool sheen give each strand its texture. Old yarn ends with a flat cut that retreats smoothly at full thickness.
 
 Plain JavaScript and three.js **0.187.0**, with the same minimal title and Settings panel as days 01–03. No build step. Browser modules load from jsDelivr, so an internet connection is required.
 
@@ -19,7 +19,7 @@ Open **http://localhost:8004**. Python 3 is required for the local server. Use `
 - **Drag a thread** to lift and pull it. Mouse, pen, and touch use the same interaction.
 - **Drag the background** to orbit; scroll or pinch to zoom.
 - **Space** pauses/resumes; **R** resets the tangle; **C** changes the palette.
-- **Settings** adjusts feeding, wandering, softness, friction, speed, fiber relief, fiber alignment, sheen, shadows, grading, and resolution.
+- **Settings** adjusts feeding, feeder orbit, softness, friction, speed, fiber relief, fiber alignment, sheen, shadows, grading, and resolution. Set Feeder orbit to zero for a stationary ring.
 
 The four palettes are Haberdashery, Wildflower, Seaside, and Sorbet. A reduced-motion preference starts the scene paused; press Space to start it.
 
@@ -85,7 +85,11 @@ await captureVideo();
 
 Recording begins from the empty floor. The camera follows the default auto orbit speed, covering 180° in 60 seconds. At 10 and 30 seconds, a visible falling strand is swung back and forth. At 20, 40, and 50 seconds, a floor loop is lifted and shaken across the pile. Each gesture uses the normal GPU picker and grab constraints; feeding continues throughout. A small ring marks the grab target.
 
+Use `captureVideo({interaction:'none'})` to record the yarn feeding and camera orbit with no dragging or cursor marker.
+
 For a more playful recording, use `captureVideo({interaction:'human',seed:20261104})`. This varies the intervals, selected strands, and paths: accelerating tosses released in motion, brief tugs, and longer shakes with uneven strokes and occasional hesitations. Short follow-ups and longer pauses give the yarn time to fly and settle. `scripts/human-gestures.js` generates the plan once from the seed, so encoding speed cannot affect gesture timing. Change the seed for another sequence; the original regular ten-second schedule remains available.
+
+Pass `interactionCount:25` to fit exactly 25 gestures into the minute, for example `captureVideo({interaction:'human',interactionCount:25,seed:2026110425})`. This busier plan mixes small flicks, tosses, tugs, lifts, and shakes. Rounded hand paths preserve motion between waypoints, with little overshoots and corrections. Irregular pauses include quick re-grabs of the same strand, and the last few seconds let the yarn settle. Hand targets still update at the 120 Hz physics rate so throws retain their release momentum.
 
 Every frame advances exactly 1/30 second, renders, snapshots a lossless PNG before presentation, and waits for the encoder's acknowledgement. The receiver verifies all 1,800 decoded frames, dimensions, frame rate, and duration. The JSON report includes gesture timings, selected yarn, and actual displacement. Existing videos are never overwritten.
 
