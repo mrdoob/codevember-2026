@@ -15,7 +15,7 @@ Open http://localhost:8003 in a WebGPU-capable browser. Python 3 serves the file
 ## Controls
 
 - Click the sculpture, press Enter or Right Arrow, or use **Settings → Melt → Primitive** to advance.
-- Drag to orbit; scroll or pinch to zoom. **Auto orbit** starts enabled.
+- Drag to orbit; scroll or pinch to zoom. **Auto orbit** starts enabled, with the camera at the lowest allowed angle, 3.6° above horizontal.
 - Space pauses or resumes; R resets the current sculpture; Escape releases the graphics device.
 - Settings adjusts heating, descent, viscosity, cohesion, material, shadows, color grading, and resolution.
 
@@ -110,6 +110,8 @@ await captureVideo({ rotationSeed: 20261105 });
 ```
 
 All eight shapes appear once, in chronological order, for five seconds each. The camera completes one 360° orbit. Shape changes are immediate, including the final knot to opening octahedron when playback loops. There are no fades or appended opening frames. Change `rotationSeed` for different orientations while retaining the same thermal seeds.
+
+Recordings default to the lowest camera angle allowed by the controls, currently 3.6° above horizontal. Pass `cameraPolarAngle` in radians to choose another allowed angle while preserving the framing distance and target. For the original elevated view, use `cameraPolarAngle: Math.atan2(9.4, 2.8)`.
 
 Frames are copied before browser presentation, encoded to PNG, and acknowledged individually by the receiver. FFmpeg uses two encoding threads. The receiver verifies all 1,200 decoded frames, dimensions, frame rate, and duration before finalizing the MP4. Existing outputs are never overwritten.
 

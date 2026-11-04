@@ -20,11 +20,20 @@ export function capturePlan(seed = 20261103) {
 
 // Same ordered PNG/FFmpeg workflow as days 01 and 02. Record each shape once,
 // in chronological order, preserving the experiment's immediate shape switches.
-export async function captureVideo({ receiver = 'http://localhost:8004', seed = 20261103, rotationSeed = seed } = {}) {
+export async function captureVideo({
+  receiver = 'http://localhost:8004', seed = 20261103, rotationSeed = seed,
+  cameraPolarAngle
+} = {}) {
   const app = window.melt;
   if (!app) throw new Error('Wait for the scene to load');
+  cameraPolarAngle ??= app.controls.maxPolarAngle;
   if (innerWidth !== SIZE || innerHeight !== SIZE || devicePixelRatio !== 1) throw new Error('Set viewport to 1024 × 1024 at device scale 1');
   if (['preparing', 'capturing', 'encoding'].includes(window.captureProgress?.status)) throw new Error('Capture already running');
+  if (!Number.isFinite(cameraPolarAngle) || cameraPolarAngle < app.controls.minPolarAngle || cameraPolarAngle > app.controls.maxPolarAngle) throw new Error('Recording angle is outside the orbit controls limits');
+  // Keep the framing distance when lowering the camera around its target.
+  const orbitDistance = Math.hypot(9.4, 2.8);
+  const orbitRadius = orbitDistance * Math.sin(cameraPolarAngle);
+  const orbitHeight = 1.4 + orbitDistance * Math.cos(cameraPolarAngle);
   const plan = capturePlan(seed);
   if (rotationSeed !== seed) {
     const rotations = capturePlan(rotationSeed);
@@ -70,7 +79,7 @@ export async function captureVideo({ receiver = 'http://localhost:8004', seed = 
   }
   function orbit(rawFrame) {
     const angle = Math.atan2(1.476, 8.2) - (rawFrame % TOTAL_FRAMES)*Math.PI*2/TOTAL_FRAMES;
-    camera.position.set(Math.sin(angle)*9.4, 4.2, Math.cos(angle)*9.4);
+    camera.position.set(Math.sin(angle)*orbitRadius, orbitHeight, Math.cos(angle)*orbitRadius);
     controls.target.set(0, 1.4, 0); controls.update(0);
   }
   async function select(index) {
@@ -99,6 +108,7 @@ export async function captureVideo({ receiver = 'http://localhost:8004', seed = 
     await post('/start', JSON.stringify({ fps:FPS, totalFrames:TOTAL_FRAMES, width:SIZE, height:SIZE,
       renderSize:RENDER_SIZE, renderPixelRatio:1.5, overlays:true, uiScale, settings:{...app.settings,pause:false},
       plan, seed, rotationSeed, fadeFrames:0, startPhaseFrame:0, orbitDegrees:360,
+      camera:{polarAngle:cameraPolarAngle,elevationDegrees:90-cameraPolarAngle*180/Math.PI,distance:orbitDistance,height:orbitHeight,target:[0,1.4,0]},
       frameOrder:'chronological',
       clips:plan.map((item,index)=>({shape:item.shape,startFrame:index*CLIP_FRAMES,frames:CLIP_FRAMES})),
       method:'Fixed steps, sequential PNG frames, encoder backpressure, each shape recorded once in order with immediate switches' }));

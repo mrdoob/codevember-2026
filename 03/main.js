@@ -65,7 +65,12 @@ export async function startExperiment() {
     controls = new OrbitControls(camera, canvas);
     controls.target.set(0, 1.4, 0); controls.enableDamping = true; controls.enablePan = false;
     controls.autoRotate = settings.autoOrbit; controls.autoRotateSpeed = .7;
-    controls.minDistance = 5; controls.maxDistance = 24; controls.maxPolarAngle = Math.PI * .48; controls.update(0);
+    controls.minDistance = 5; controls.maxDistance = 24; controls.maxPolarAngle = Math.PI * .48;
+    // Start at the lowest allowed angle while preserving the framing distance.
+    const cameraOffset = new THREE.Spherical().setFromVector3(camera.position.clone().sub(controls.target));
+    cameraOffset.phi = controls.maxPolarAngle;
+    camera.position.setFromSpherical(cameraOffset).add(controls.target);
+    controls.update(0);
     const studio = createStudioLighting(scene, settings.shadowSoftness, settings.shadowAO);
     const material = new WaxNodeMaterial({ vertexColors: true, roughness: settings.roughness, diffuseRoughness: settings.diffuseRoughness, clearcoat: settings.clearcoat, clearcoatRoughness: .3, ior: 1.44, specularIntensity: .8 });
     const scattering = uniform(settings.scattering), scatterDistance = uniform(settings.scatterDistance);
