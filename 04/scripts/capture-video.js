@@ -11,6 +11,13 @@ const smooth = x => {
   return x * x * (3 - 2 * x);
 };
 
+function setCameraPolarAngle(camera, controls, angle) {
+  camera.position
+    .setFromSphericalCoords(controls.getDistance(), angle, controls.getAzimuthalAngle())
+    .add(controls.target);
+  controls.update(0);
+}
+
 // The camera keeps orbiting while each held strand is lifted, swung, and released.
 export const DRAG_PLAN = [
   { at: 10, region: 'falling', strand: 0, duration: 3.2, amplitude: 1.05, lift: 0.3, frequency: 1.4, direction: 1 },
@@ -129,7 +136,8 @@ export async function captureVideo({
   receiver = 'http://localhost:8005',
   interaction = 'regular',
   seed = 20261104,
-  interactionCount = null
+  interactionCount = null,
+  cameraMotion = 'orbit'
 } = {}) {
   const app = window.tangle,
     totalFrames = Math.round(duration * FPS);
@@ -141,6 +149,7 @@ export async function captureVideo({
   if (['preparing', 'capturing', 'encoding'].includes(window.captureProgress?.status))
     throw new Error('Capture already running');
   if (!['none', 'regular', 'human'].includes(interaction)) throw new Error('Unknown interaction style');
+  if (!['orbit', 'rise'].includes(cameraMotion)) throw new Error('Unknown camera motion');
   if (interactionCount !== null && interaction !== 'human') throw new Error('Interaction count requires human mode');
   const schedule =
     interaction === 'none' ? [] : interaction === 'human' ? createHumanPlan(duration, seed, interactionCount) : DRAG_PLAN;
@@ -151,6 +160,7 @@ export async function captureVideo({
     frame: 0,
     totalFrames,
     drags: [],
+    cameraFrames: [],
     started: performance.now(),
     cancelled: false
   });
@@ -239,6 +249,7 @@ export async function captureVideo({
     controls.enableDamping = false;
     controls.update(0);
     controls.reset();
+    if (cameraMotion === 'rise') setCameraPolarAngle(camera, controls, controls.maxPolarAngle);
     Object.assign(app.settings, { autoOrbit: true, speed: 1, pause: true });
     renderer.setPixelRatio(1);
     renderer.setSize(RENDER_SIZE, RENDER_SIZE, false);
@@ -273,6 +284,7 @@ export async function captureVideo({
         initial,
         interaction,
         interactionCount,
+        cameraMotion,
         seed,
         dragPlan: plans,
         camera: {
@@ -292,6 +304,20 @@ export async function captureVideo({
         throw new Error('Canvas resized during capture');
       await nextFrame();
       if (frame > 0) controls.update(1 / FPS);
+      if (cameraMotion === 'rise') {
+        const progress = smooth(frame / Math.max(1, totalFrames - 1));
+        const angle = controls.maxPolarAngle + (controls.minPolarAngle - controls.maxPolarAngle) * progress;
+        setCameraPolarAngle(camera, controls, angle);
+      }
+      if (frame % (FPS * 10) === 0 || frame === totalFrames - 1) {
+        state.cameraFrames.push({
+          frame,
+          position: camera.position.toArray(),
+          polarAngle: controls.getPolarAngle(),
+          azimuthalAngle: controls.getAzimuthalAngle(),
+          distance: controls.getDistance()
+        });
+      }
       const plan = plans.find(item => Math.round(item.at * FPS) === frame);
       if (plan) grab = await beginGesture(app, plan, frame, state.drags);
       if (grab && frame === grab.record.startFrame + grab.record.durationFrames) {
@@ -347,6 +373,7 @@ export async function captureVideo({
       '/finish',
       JSON.stringify({
         drags: state.drags,
+        cameraFrames: state.cameraFrames,
         final,
         simulationTime: app.simulation.time,
         elapsedSeconds: (performance.now() - state.started) / 1000

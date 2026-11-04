@@ -368,11 +368,9 @@ export class GPURopeSimulation {
       if(local>=live) { (*result)[id]=(*positions)[id];(*velocity)[id]=vec4<f32>(0.0);return; }
       let grabIndex=i32(grab.x)+i32(round((clock.z-grab.y)/${f(SPACING)}));
       let nearGrab=grab.z>0.5 && u32(max(0.0,grab.x))/${C}u==id/${C}u && abs(i32(id)-grabIndex)<32;
-      var supported=p.y<=${f(RADIUS + 0.004)} || (*contacts)[id].x>.5;
-      if(local>0u && local<live-1u) {
-        let left=(*carry)[${N}u+id-1u];let right=(*carry)[${N}u+id+1u];
-        supported=supported || (left.w>=${f(SLEEP_TIME)} && right.w>=${f(SLEEP_TIME)} && p.y<=max(left.y,right.y)+.04);
-      }
+      // Sleeping neighbors do not prove support: an entire span can otherwise
+      // keep itself asleep after the yarn beneath it is cut away.
+      let supported=p.y<=${f(RADIUS + 0.004)} || (*contacts)[id].x>.5;
       var age=0.0;var restPosition=p;
       let canRest=supported && !nearGrab && settings.w>0.0 && local>0u;
       if(canRest) {

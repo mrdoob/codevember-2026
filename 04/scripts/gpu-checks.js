@@ -1,7 +1,9 @@
 // Run in the existing experiment tab:
 // await (await import('./scripts/gpu-checks.js')).runGPUChecks(tangle)
 // Full particle readbacks are diagnostic only, never part of the animation loop.
-import { RADIUS, SPACING, INITIAL_COUNT } from '../rope-config.js';
+import { instanceIndex } from 'three/tsl';
+import { GPURopeSimulation } from '../gpu-rope.js';
+import { RADIUS, SPACING, INITIAL_COUNT, STEP } from '../rope-config.js';
 import { yarnIndexCount } from '../yarn-layout.js';
 
 const check = (condition, message) => {
@@ -9,6 +11,93 @@ const check = (condition, message) => {
 };
 const nextFrame = () => new Promise(requestAnimationFrame);
 const read = async (app, buffer) => new Float32Array(await app.renderer.getArrayBufferAsync(buffer.value));
+
+// Isolate contact and sleep behavior with two resting, stacked strands. Move
+// the lower strand away, then verify that the upper strand wakes and falls.
+export async function runGPUSupportChecks(renderer) {
+  const count = 24;
+  const g = new GPURopeSimulation(renderer, { strands: 2, count });
+  const ptr = 'ptr<storage,array<vec4<f32>>,read_write>';
+  const literal = value => Number(value).toFixed(9);
+  try {
+    g.settings.feed = 0;
+    g.settings.wander = 0;
+    g.syncSettings();
+    const seed = g.kernel(
+      'Seed stacked yarn check',
+      `fn seed(id:u32,positions:${ptr},materials:${ptr},velocity:${ptr}) -> void {
+        if(id>=${g.total}u) { return; }
+        let p=vec4<f32>(f32(id%${count}u)*${literal(SPACING)},
+          ${literal(RADIUS)}+f32(id/${count}u)*${literal(RADIUS * 2)},0.0,0.0);
+        (*positions)[id]=p;(*velocity)[id]=vec4<f32>(0.0);
+        (*materials)[id]=vec4<f32>(0.0,1.0,0.0,0.0);
+        (*materials)[${g.total}u+id]=vec4<f32>(p.xyz,.5);
+      }`,
+      { id: instanceIndex, positions: g.a, materials: g.normals, velocity: g.velocity },
+      g.total
+    );
+    // Use gravity without the inlet or length constraints so they cannot
+    // support the upper strand after its contact disappears.
+    const predict = g.kernel(
+      'Drop unsupported yarn check',
+      `fn predict(id:u32,positions:${ptr},output:${ptr},previous:${ptr},velocity:${ptr},materials:${ptr},carry:${ptr}) -> void {
+        if(id>=${g.total}u) { return; }
+        let p=(*positions)[id];(*previous)[id]=p;
+        (*carry)[id]=(*materials)[id];(*carry)[${g.total}u+id]=(*materials)[${g.total}u+id];
+        var next=p.xyz;
+        if(id%${count}u>0u) {
+          let v=(*velocity)[id].xyz+vec3<f32>(0.0,-${literal(9.81 * STEP)},0.0);
+          next+=v*${literal(STEP)};
+        }
+        (*output)[id]=vec4<f32>(next,0.0);
+      }`,
+      {
+        id: instanceIndex,
+        positions: g.a,
+        output: g.b,
+        previous: g.previous,
+        velocity: g.velocity,
+        materials: g.normals,
+        carry: g.materialPrevious
+      },
+      g.total
+    );
+    const remove = g.kernel(
+      'Remove supporting yarn check',
+      `fn remove(id:u32,positions:${ptr},materials:${ptr}) -> void {
+        if(id>=${count}u) { return; }
+        (*positions)[id].z+=2.0;(*materials)[${g.total}u+id].z+=2.0;
+      }`,
+      { id: instanceIndex, positions: g.a, materials: g.normals },
+      count
+    );
+    const step = [predict, g.clearNode, g.binNode, g.contactNode, g.velocityNode, g.orientNode];
+    renderer.compute(seed);
+    for (let i = 0; i < 10; i++) renderer.compute(step);
+    const supported = await read({ renderer }, g.a);
+    const indices = Array.from({ length: count - 8 }, (_, i) => count + i + 4);
+    const supportedDrift = Math.max(...indices.map(i => Math.abs(supported[i * 4 + 1] - RADIUS * 3)));
+    check(supportedDrift < 1e-6, 'Supported yarn must remain settled');
+    renderer.compute(remove);
+    renderer.compute(step);
+    const materials = await read({ renderer }, g.normals);
+    check(
+      indices.every(i => materials[(g.total + i) * 4 + 3] === 0),
+      'Removing support must wake sleeping yarn'
+    );
+    for (let i = 0; i < 23; i++) renderer.compute(step);
+    const fallen = await read({ renderer }, g.a);
+    const minimumDrop = Math.min(...indices.map(i => supported[i * 4 + 1] - fallen[i * 4 + 1]));
+    check(minimumDrop > RADIUS, 'Unsupported yarn must fall under gravity');
+    check(
+      indices.every(i => fallen[i * 4 + 1] >= RADIUS - 1e-6),
+      'Falling yarn must stop at the floor'
+    );
+    return { supportedDrift, minimumDrop, passed: true };
+  } finally {
+    g.dispose();
+  }
+}
 
 export async function runGPUChecks(app) {
   const g = app.simulation;
@@ -26,6 +115,7 @@ export async function runGPUChecks(app) {
     app.pause(true);
     app.manual = true;
     app.reset();
+    report.supportRemoval = await runGPUSupportChecks(app.renderer);
     const initial = await g.inspect();
     check(initial.finite && initial.minY > 1 && initial.maxStretch < 0.001, 'Startup must leave the floor empty');
     check(initial.particles === Math.min(INITIAL_COUNT, g.count) * g.strands, 'Incorrect initial hanging length');
