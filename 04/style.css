@@ -1,0 +1,102 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #e7dfd2;
+  color: #4d4943;
+  font:
+    11px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+[hidden] {
+  display: none !important;
+}
+main {
+  position: fixed;
+  inset: 0;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+}
+canvas:active {
+  cursor: grabbing;
+}
+canvas:focus-visible {
+  outline: 1px solid #81796b;
+  outline-offset: -4px;
+}
+header {
+  position: fixed;
+  z-index: 2;
+  top: 24px;
+  left: 28px;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+}
+header p {
+  margin: 6px 0 0;
+  color: #81786b;
+  letter-spacing: normal;
+}
+#status {
+  position: fixed;
+  inset: 50% 24px auto;
+  text-align: center;
+  pointer-events: none;
+}
+.lil-gui.root {
+  top: 20px;
+  right: 28px;
+  max-height: calc(100dvh - 110px);
+}
+.lil-gui.root,
+.lil-gui.root .lil-gui {
+  --background-color: #e1d9cd;
+  --text-color: #5c554b;
+  --title-background-color: #dad1c3;
+  --title-text-color: #5c554b;
+  --widget-color: #cfc5b6;
+  --hover-color: #c7baa7;
+  --focus-color: #bbae99;
+  --number-color: #856842;
+  --string-color: #856842;
+  --font-size: 11px;
+}
+.lil-gui.root > .children {
+  overflow-y: auto;
+  max-height: calc(100dvh - 160px);
+}
+.lil-gui.root,
+.lil-gui.root * {
+  text-transform: uppercase;
+}
+@media (max-width: 600px) {
+  header {
+    left: 16px;
+    top: 20px;
+    font-size: 10px;
+  }
+  header p {
+    font-size: 9px;
+  }
+  .lil-gui.root {
+    right: 16px;
+    top: 78px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+}

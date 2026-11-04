@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e7dfd2" />
+    <meta
+      name="description"
+      content="A handful of wandering threads, a growing tangle. An interactive yarn experiment for Codevember 2026."
+    />
+    <title>Codevember 2026 / 04 / Tangle</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main aria-label="Five strands of wool coiling into a tangle">
+      <canvas
+        tabindex="0"
+        aria-label="Drag the yarn to pull it. Drag the background to orbit. Scroll to zoom. Space to pause, R to reset, C to change colors."
+      ></canvas>
+    </main>
+    <header>
+      <span>CODEVEMBER 2026 / 04 / TANGLE</span>
+      <p>Drag a thread · Space to pause</p>
+    </header>
+    <div id="status" role="status">Preparing yarn…</div>
+    <script type="module" src="bootstrap.js"></script>
+  </body>
+</html>
