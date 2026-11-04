@@ -1,6 +1,6 @@
 # Codevember 2026
 
-Daily creative coding experiments for November 2026.
+Daily creative agentic coding experiments for November 2026.
 
 Following the [prompt list shared by @thespite](https://x.com/thespite/status/2116974998212772095).
 
