@@ -10,7 +10,7 @@ Following the [prompt list shared by @thespite](https://x.com/thespite/status/21
 | 02 | Shatter | [View](https://mrdoob.github.io/codevember-2026/02/) | [Code](02/) |
 | 03 | Melt | [View](https://mrdoob.github.io/codevember-2026/03/) | [Code](03/) |
 | 04 | Tangle | [View](https://mrdoob.github.io/codevember-2026/04/) | [Code](04/) |
-| 05 | Moss | — | — |
+| 05 | Moss | [View](https://mrdoob.github.io/codevember-2026/05/) | [Code](05/) |
 | 06 | Orrery | — | — |
 | 07 | Hollow | — | — |
 | 08 | Tesseract | — | — |
