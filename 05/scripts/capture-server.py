@@ -38,7 +38,7 @@ class Capture:
         self.preview_frames.update(range(0, frames, 5 * metadata['fps']))
         self.preview_frames.update(range(0, min(frames, 7 * metadata['fps']), metadata['fps']))
         events = [shot['start'] for shot in metadata.get('shots', [])]
-        events += metadata.get('meshletInterval', [])
+        events += [time for interval in metadata.get('meshletIntervals', []) for time in interval]
         for second in events:
             at = round(second * metadata['fps'])
             self.preview_frames.update(i for i in (at - 1, at, at + 1) if 0 <= i < frames)

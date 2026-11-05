@@ -6,12 +6,13 @@ const lerp = (a, b, t) => a + (b - a) * t;
 
 export const SHOT_PLAN = [
   { start: 0, end: 17, name: 'Rise and first nudges', target: [0, 2.1, 0], distance: [8, 7.3], elevation: [12, 16], azimuth: .24, orbit: .055 },
-  { start: 17, end: 28, name: 'Moss close-up', target: [0, 2.65, 0], distance: [2.25, 1.95], elevation: [28, 35], azimuth: .15, orbit: .04 },
-  { start: 28, end: 40, name: '30-degree downward orbit and nudges', target: [0, 2.1, 0], distance: [8, 7.6], elevation: [30, 30], azimuth: -.95, orbit: .05 },
+  { start: 17, end: 22.5, name: 'Front moss close-up', target: [0, 2.65, 0], distance: [2.25, 1.95], elevation: [28, 35], azimuth: .15, orbit: .04 },
+  { start: 22.5, end: 28, name: 'Side moss close-up', target: [.3, 2.6, -.15], distance: [1.7, 1.4], elevation: [24, 30], azimuth: -1.8, orbit: .04 },
+  { start: 28, end: 40, name: 'Low orbit and nudges', target: [0, 3.1, 0], distance: [4, 3.9], elevation: [-40, -40], azimuth: -.2, orbit: .045, fov: 80 },
   { start: 40, end: 50, name: '75-degree polar orbit and meshlets', target: [0, 2.15, 0], distance: [6.8, 6.3], elevation: [15, 15], azimuth: 1.8, orbit: .045 },
   { start: 50, end: 60, name: 'Final moss macro detail', target: [0, 2.65, 0], distance: [1.15, .85], elevation: [36, 43], azimuth: 2.7, orbit: .04 }
 ];
-export const MESHLET_INTERVAL = [44, 48];
+export const MESHLET_INTERVALS = [[44, 48], [57, 60]];
 
 export function captureShotAt(time) {
   return SHOT_PLAN.find(shot => time < shot.end) ?? SHOT_PLAN.at(-1);
@@ -24,10 +25,12 @@ export function setCaptureCamera(app, time) {
   const radius = Math.cos(elevation) * distance;
   const hero = app.garden.rocks[0].layout;
   const opening = -(hero.center[1] - hero.groundY) * (1 - cameraLiftProgress(time));
+  app.camera.fov = shot.fov ?? 38;
+  app.camera.updateProjectionMatrix();
   app.controls.target.fromArray(shot.target); app.controls.target.y += opening;
   app.camera.position.set(Math.sin(angle) * radius, Math.sin(elevation) * distance, Math.cos(angle) * radius).add(app.controls.target);
   app.camera.lookAt(app.controls.target); app.camera.updateMatrixWorld(); app.focusPoint.copy(app.controls.target);
-  app.settings.meshlets = time >= MESHLET_INTERVAL[0] && time < MESHLET_INTERVAL[1];
+  app.settings.meshlets = MESHLET_INTERVALS.some(([start, end]) => time >= start && time < end);
   return shot;
 }
 

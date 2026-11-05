@@ -7,6 +7,7 @@
     <meta name="description" content="A floating moss garden with three smaller companion stones, grown leaf by leaf and lit by fireflies. An interactive WebGPU experiment for Codevember 2026." />
     <title>Codevember 2026 / 05 / Moss</title>
     <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
     <link rel="stylesheet" href="style.css" />
     <script type="importmap">
       {
@@ -18,6 +19,10 @@
         }
       }
     </script>
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.core.js" />
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js" />
+    <link rel="modulepreload" href="https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.tsl.js" />
+    <link rel="modulepreload" href="main.js" />
   </head>
   <body>
     <main aria-label="A large floating moss-covered stone and three smaller companions">

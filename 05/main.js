@@ -13,6 +13,13 @@ import { cameraLiftProgress } from './floating-rocks.js';
 import { createSettings, createSettingsPanel } from './settings.js';
 
 export async function startExperiment() {
+  const startup = window.mossStartup = { modulesMs: performance.now() };
+  let phaseStarted = performance.now();
+  const finishPhase = name => {
+    const now = performance.now();
+    startup[name] = now - phaseStarted;
+    phaseStarted = now;
+  };
   const canvas = document.querySelector('canvas'), status = document.querySelector('#status');
   const progress = message => { status.textContent = message; };
   const abort = new AbortController();
@@ -41,6 +48,7 @@ export async function startExperiment() {
     renderer = new THREE.WebGPURenderer({ canvas, antialias: false, forceWebGL: false });
     renderer.onDeviceLost = info => stop(new Error(`Graphics device lost: ${info.message}`));
     await renderer.init();
+    finishPhase('deviceMs');
     if (!renderer.backend.isWebGPUBackend) throw new Error('A WebGPU adapter is required for the meshlet experiment.');
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = settings.exposure;
@@ -50,10 +58,12 @@ export async function startExperiment() {
     renderer.drawingPipeline = meshlets;
     materials = createMaterials(settings);
     garden = await createGarden(materials, progress);
+    finishPhase('gardenMs');
     garden.setSporophytes(settings.sporophytes);
     scene.add(garden.group);
     progress('Growing woodland and gathering light…');
     habitat = await createHabitat(scene, renderer, materials, settings);
+    finishPhase('habitatMs');
     // The static environment capture needs no clusters. Install the light grid
     // before compiling the live scene, with room for every firefly in one cell.
     renderer.lighting.dispose();
@@ -228,10 +238,15 @@ export async function startExperiment() {
       garden, habitat, changed, resetView, updateSun, updateEnvironment, setMSAA, setAmbientOcclusion, resize, pause
     });
     progress('Preparing meshlets and light…');
+    finishPhase('setupMs');
     await new Promise(resolve => requestAnimationFrame(resolve));
-    await renderer.compileAsync(scene, camera);
+    await post.compile();
+    finishPhase('compileMs');
     if (stopped) return;
     render();
+    finishPhase('firstRenderMs');
+    startup.readyMs = performance.now();
+    startup.sceneMs = startup.readyMs - startup.modulesMs;
     status.hidden = true;
     let measuredAt = performance.now(), frameCount = 0;
     function frame(now) {
@@ -263,7 +278,7 @@ export async function startExperiment() {
       inspect() { return { backend: renderer.backend.isWebGPUBackend ? 'WebGPU' : 'WebGL', ...garden.stats, woodland: habitat.woodland.stats,
         meshletClusters: meshlets.info.clusters, meshletTriangles: meshlets.info.triangles,
         lodError: meshlets.lodThreshold, fireflies: settings.fireflies ? FIREFLY_COUNT : 0,
-        focusDepth: [post.focusNear.value, post.focusFar.value], ...metrics, time: materials.time.value }; }
+        focusDepth: [post.focusNear.value, post.focusFar.value], startup: { ...startup }, ...metrics, time: materials.time.value }; }
     };
     animation = requestAnimationFrame(frame);
   } catch (error) { stop(); throw error; }

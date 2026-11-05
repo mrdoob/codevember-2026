@@ -1,4 +1,4 @@
-import { ACESFilmicToneMapping, NoToneMapping, RenderPipeline, UnsignedByteType, Vector2 } from 'three/webgpu';
+import { ACESFilmicToneMapping, LinearSRGBColorSpace, NoToneMapping, RenderPipeline, UnsignedByteType, Vector2 } from 'three/webgpu';
 import { Fn, Loop, float, pass, uniform, renderOutput, rtt, mix, vec2, vec3, vec4, uv, screenUV, perspectiveDepthToViewZ, toneMapping, toneMappingExposure } from 'three/tsl';
 import { fxaa } from 'three/addons/tsl/display/FXAANode.js';
 import { ao } from 'three/addons/tsl/display/GTAONode.js';
@@ -77,6 +77,19 @@ export function createPostProcessing(renderer, scene, camera, settings, subject,
   pipeline.outputColorTransform = false;
   pipeline.outputNode = settings.msaa ? target : fxaa(target);
   return { pipeline, scenePass, outputTarget: target.renderTarget, occlusion, focusNear, focusFar, focusVolume, depthRange, aperture, enabled, saturation, grading,
+    async compile() {
+      // Match the beauty pass's multisampling, target format, and linear output.
+      // Compiling the canvas would build a second set of unused scene shaders.
+      const toneMapping = renderer.toneMapping, outputColorSpace = renderer.outputColorSpace;
+      try {
+        renderer.toneMapping = NoToneMapping;
+        renderer.outputColorSpace = LinearSRGBColorSpace;
+        await scenePass.compileAsync(renderer);
+      } finally {
+        renderer.toneMapping = toneMapping;
+        renderer.outputColorSpace = outputColorSpace;
+      }
+    },
     render() {
       renderer.getDrawingBufferSize(inverseSize.value);
       inverseSize.value.set(1 / inverseSize.value.x, 1 / inverseSize.value.y);

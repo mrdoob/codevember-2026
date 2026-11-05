@@ -99,10 +99,13 @@ await captureVideo();
 | Time | View and interaction |
 | --- | --- |
 | 0–17 s | Rocks rise, then a group orbit; tap the hero at 9 s and a companion at 13 s. |
-| 17–28 s | Close orbit across the front moss cushions. |
-| 28–40 s | Look down at 30°; tap a companion at 31 s and the hero at 35 s. |
+| 17–22.5 s | Close orbit across the front moss cushions. |
+| 22.5–28 s | A second close-up across the side cushions, with a companion in the background. |
+| 28–40 s | Low orbit looking up beneath the rocks; tap a companion at 31 s and the hero at 35 s. |
 | 40–50 s | 75° polar angle, or 15° above the horizon; show meshlets from 44–48 s, without a label. |
-| 50–60 s | Normal rendering in a tight macro orbit, approaching from 1.15 to 0.85 units from the target. |
+| 50–60 s | Tight macro orbit, approaching from 1.15 to 0.85 units from the target; switch to meshlets again for the final three seconds. |
+
+The low orbit uses 25 on the requested camera scale (0 below, 45 horizontal, 90 above), equivalent to −40° elevation about its orbit target. A wider lens keeps the nearby stones in view while the camera stays above the terrain. Both meshlet reveals omit a text label.
 
 Taps use the real pointerdown handler and raycast-confirmed surfaces; each reaction is checked before pointerup. Each frame advances exactly 1/30 second. Views and render modes are warmed before capture, and extra internal renders at cuts let culling settle without advancing animation.
 

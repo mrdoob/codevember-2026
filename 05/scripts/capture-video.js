@@ -1,12 +1,12 @@
 import { ROCK_REACTION_DURATION } from '../rock-reaction.js';
 import { smootherstep } from '../random.js';
-import { SHOT_PLAN, MESHLET_INTERVAL, PRESS_PLAN, captureShotAt, setCaptureCamera, findCaptureTap } from './capture-shots.js';
+import { SHOT_PLAN, MESHLET_INTERVALS, PRESS_PLAN, captureShotAt, setCaptureCamera, findCaptureTap } from './capture-shots.js';
 
 const FPS = 30, SIZE = 1024, RENDER_SIZE = 1536;
 const nextFrame = () => new Promise(requestAnimationFrame);
 
-// Same ordered PNG-to-FFmpeg workflow as days 01–04. Five orbiting shots with
-// real pointerdown events, click rings, and a short meshlet reveal; no cursor.
+// Same ordered PNG-to-FFmpeg workflow as days 01–04. Six orbiting shots with
+// real pointerdown events, click rings, and two meshlet reveals; no cursor.
 export async function captureVideo({ duration = 60, receiver = 'http://localhost:8006' } = {}) {
   const app = window.moss, totalFrames = Math.round(duration * FPS);
   if (!app) throw new Error('Wait for the experiment to load');
@@ -106,7 +106,9 @@ export async function captureVideo({ duration = 60, receiver = 'http://localhost
     renderer.backend.device.pushErrorScope('validation'); errorScope = true;
     // Compile both render modes and warm each framing before beginning the
     // chronological simulation. Seeking back to zero resets firefly pursuit.
-    for (const time of [0, 22, 34, 45, 54]) {
+    const warmupTimes = [...SHOT_PLAN.map(shot => (shot.start + shot.end) / 2),
+      ...MESHLET_INTERVALS.map(([start, end]) => (start + end) / 2)];
+    for (const time of warmupTimes) {
       materials.time.value = time; garden.update(time); cameraAt(time);
       for (let i = 0; i < 3; i++) { await nextFrame(); app.render(); }
     }
@@ -118,9 +120,10 @@ export async function captureVideo({ duration = 60, receiver = 'http://localhost
       opening: 'Grounded stones rise with a stagger into hovering by six seconds',
       groundHeights: garden.rocks.map(rock => rock.layout.groundY),
       settings: { ...settings, pause: false }, pressPlan: presses, camera: { position: camera.position.toArray(), target: controls.target.toArray() },
-      shots: SHOT_PLAN, meshletInterval: MESHLET_INTERVAL,
+      shots: SHOT_PLAN, meshletIntervals: MESHLET_INTERVALS,
+      lowCameraAngle: { value: 25, scale: '0 below, 45 horizontal, 90 above', elevation: -40 },
       orbitDegrees: SHOT_PLAN.reduce((sum, shot) => sum + (shot.end - shot.start) * shot.orbit, 0) * 180 / Math.PI,
-      cameraMotion: 'Five orbiting shots with clean cuts: rising group, close-up, 30-degree downward interactions, 75-degree polar/meshlets, tighter normal macro',
+      cameraMotion: 'Six orbiting shots: rising group, front macro, side macro, low-angle interactions, meshlet reveal, final macro ending in meshlets',
       method: 'Fixed animation steps, sequential lossless PNG frames, encoder backpressure' }));
     started = true; state.status = 'capturing';
     let previousMode = '';
@@ -142,7 +145,7 @@ export async function captureVideo({ duration = 60, receiver = 'http://localhost
       snapshot(time);
       if (frame % FPS === 0 || frame === totalFrames - 1) {
         const delta = camera.position.clone().sub(controls.target);
-        state.cameraFrames.push({ frame, shot: shot.name, meshlets: settings.meshlets,
+        state.cameraFrames.push({ frame, shot: shot.name, meshlets: settings.meshlets, fov: camera.fov,
           position: camera.position.toArray(), target: controls.target.toArray(),
           distance: delta.length(), elevation: Math.atan2(delta.y, Math.hypot(delta.x, delta.z)) * 180 / Math.PI,
           rockHeights: garden.rocks.map(rock => rock.pivot.position.y) });
