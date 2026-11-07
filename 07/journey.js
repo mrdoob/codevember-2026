@@ -1,5 +1,5 @@
 export const RATIO = 0.34;
-export const DURATION = 6;
+export const DURATION = 4;
 export const BASE_SCALE = 1.65;
 export const SHELL_BOUND = 1.35;
 export const SPLIT_DISTANCE = 2.3;

@@ -14,13 +14,13 @@ import {
 } from "../scripts/capture-sequence.js";
 
 test("capture shows all eleven shapes once, with no duplicate endpoint frame", () => {
-  assert.equal(DURATION, 66);
+  assert.equal(DURATION, 44);
   assert.equal(TOTAL_FRAMES, DURATION * FPS);
   assert.equal(new Set(SHOTS.map((shot) => shot.shape)).size, SHAPES.length);
   for (const shot of SHOTS) {
     assert.equal(frameAt(shot.startFrame).shape, shot.shape);
     assert.equal(frameAt(shot.startFrame + shot.frames - 1).shape, shot.shape);
-    assert.equal(shot.frames, 180);
+    assert.equal(shot.frames, 120);
   }
   assert.equal(frameAt(0).shape, "Hexagonal bipyramid");
   assert.equal(frameAt(TOTAL_FRAMES).shape, frameAt(0).shape);

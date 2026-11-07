@@ -45,9 +45,9 @@ Reduced-motion preferences start on a paused reveal; advancing selects another s
 
 The sequence starts with hexagonal bipyramid, icosahedron, barrel, and hexagonal prism, then dodecahedron, octahedron, cylinder, capsule, sphere, rounded cube, and triangular prism. Interior colors follow an independent 32-bit hue permutation.
 
-A layer lasts six seconds. Splitting starts immediately and eases open over 5.04 seconds. Objects and departing halves keep the same continuous spin; edge hinges add up to 17.2° of outward tilt. Translation follows a fixed direction with continuing drift. The camera and sculpture share an orbit, keeping the cut oblique and the central view clear by construction. The camera never rolls.
+A layer lasts four seconds. Splitting starts immediately and eases open over 3.36 seconds. Objects and departing halves keep the same continuous spin; edge hinges add up to 17.2° of outward tilt. Translation follows a fixed direction with continuing drift. The camera and sculpture share an orbit, keeping the cut oblique and the central view clear by construction. The camera never rolls.
 
-Scaling only relative layer offsets gives the impression of endless forward travel without ever-growing coordinates. Eight reusable slots hold at most five active roots: the previous shell, the current object, and three descendants. Departing shells fade into the background over their final 3.3 seconds, including their reflections and shadows, then leave when the second subsequent split begins.
+Scaling only relative layer offsets gives the impression of endless forward travel without ever-growing coordinates. Eight reusable slots hold at most five active roots: the previous shell, the current object, and three descendants. Departing shells fade into the background over their final 2.2 seconds, including their reflections and shadows, then leave when the second subsequent split begins.
 
 Closed objects use continuous outer meshes. Split surfaces retain the same texture coordinates. Each slot has a small HDR cube probe capturing its immediate enclosing shell; a 17-tap filter softens that reflection over the static studio environment. This approximates local reflections rather than tracing every mutual reflection.
 
@@ -87,7 +87,7 @@ Allow a fresh animation frame between manual renders. `advance(dt)` respects pau
 
 ## Video capture
 
-The capture follows the earlier days: **1024 × 1024 H.264 MP4 at 30 fps**, rendered at 1536 × 1536 and downsampled. This sequence runs for **66 seconds**, showing all eleven shapes for six seconds each, starting with the hexagonal bipyramid. The title and collapsed Settings panel are included at √2 UI scale, with no cursor.
+The capture follows the earlier days: **1024 × 1024 H.264 MP4 at 30 fps**, rendered at 1536 × 1536 and downsampled. This sequence runs for **44 seconds**, showing all eleven shapes for four seconds each, starting with the hexagonal bipyramid. The title and collapsed Settings panel are included at √2 UI scale, with no cursor.
 
 Start the local page normally, then run the receiver in another terminal (FFmpeg and ffprobe must be on PATH):
 
@@ -105,6 +105,6 @@ For this recording, appearance seeds repeat after eleven layers and the camera c
 
 Sixty-four preceding frames initialize the enclosing shells, reflection probes, and shadows before recording starts. The capture compares the rendered loop endpoint with frame zero before recording and again after the complete sequence. The endpoint is omitted from the video: the last frame is exactly one time step before the first, with no duplicated frame or crossfade. Motion and camera tests also check matching transforms and boundary velocity.
 
-Each lossless PNG is acknowledged before the next frame. The receiver verifies all 1,980 decoded frames, resolution, frame rate, and duration, then writes a JSON report with the shape sequence, loop comparison, and frame hashes. `--previews` saves selected PNGs alongside the video. Outputs go into `exports/`; existing videos are never overwritten. To choose a filename, pass it to the receiver before `--previews`.
+Each lossless PNG is acknowledged before the next frame. The receiver verifies all 1,320 decoded frames, resolution, frame rate, and duration, then writes a JSON report with the shape sequence, loop comparison, and frame hashes. `--previews` saves selected PNGs alongside the video. Outputs go into `exports/`; existing videos are never overwritten. To choose a filename, pass it to the receiver before `--previews`.
 
 `window.captureProgress` reports status and frame count; call `captureProgress.cancel()` to stop. The renderer, camera, journey, settings, and UI are restored afterward. The sequence is defined in `scripts/capture-sequence.js`.
