@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#c9ced5" />
+    <meta
+      name="description"
+      content="Hollow. An endless journey through eleven satin metal primitives with polished edges, colorful brushed-metal interiors, and depth of field. A procedural WebGPU experiment for Codevember 2026."
+    />
+    <title>Codevember 2026 / 07 / Hollow</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <canvas
+        tabindex="0"
+        aria-label="An endless sequence of hollow metal shapes. Drag to turn. Space to pause. Right arrow to enter the next shell."
+      ></canvas>
+    </main>
+    <header>
+      <span>CODEVEMBER 2026 / 07 / HOLLOW</span>
+      <p>Shapes all the way down.</p>
+    </header>
+    <div id="status" role="status">Preparing the first shell…</div>
+    <script type="module" src="bootstrap.js"></script>
+  </body>
+</html>

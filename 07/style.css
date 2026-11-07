@@ -1,0 +1,104 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #c9ced5;
+  color: #343b47;
+  font:
+    11px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+[hidden] {
+  display: none !important;
+}
+main {
+  position: fixed;
+  inset: 0;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+}
+canvas:active {
+  cursor: grabbing;
+}
+canvas:focus-visible {
+  outline: 1px solid #616b7a;
+  outline-offset: -5px;
+}
+header {
+  position: fixed;
+  z-index: 2;
+  top: 24px;
+  left: 28px;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+}
+header p {
+  margin: 6px 0 0;
+  color: #626a78;
+  letter-spacing: 0;
+}
+#status {
+  position: fixed;
+  inset: 50% 24px auto;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.lil-gui.root {
+  top: 20px;
+  right: 28px;
+}
+.lil-gui.root,
+.lil-gui.root .lil-gui {
+  --background-color: rgb(220 224 232 / 0.25);
+  --text-color: #343b47;
+  --title-background-color: transparent;
+  --title-text-color: #343b47;
+  --widget-color: #b7bfcb;
+  --hover-color: #a5afbd;
+  --focus-color: #98a4b5;
+  --number-color: #25344e;
+  --string-color: #25344e;
+  --font-size: 11px;
+}
+.lil-gui.root,
+.lil-gui.root * {
+  text-transform: uppercase;
+}
+.lil-gui.root .lil-gui {
+  background-color: transparent;
+}
+.lil-gui.root .title {
+  position: relative;
+  text-align: center;
+}
+.lil-gui.root .title::before {
+  position: static;
+  padding-right: 2px;
+}
+@media (max-width: 600px) {
+  header {
+    top: 20px;
+    left: 16px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+  header p {
+    font-size: 9px;
+  }
+  .lil-gui.root {
+    right: 16px;
+    top: 76px;
+  }
+}
