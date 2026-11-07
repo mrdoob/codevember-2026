@@ -95,20 +95,22 @@ export async function startExperiment() {
     lastTime = null;
     dirty = true;
   }
-  function sync() {
-    shells.update(journey, settings, turn.y);
+  function sync(cycleLength, cameraTurn) {
+    shells.update(journey, settings, cameraTurn.y, cycleLength);
     const angles = cameraAngles(
       settings.orbit ? journey.depth : 0,
       settings.cameraMotion,
+      cycleLength,
     );
     cameraDirection(
       journey.depth,
-      turn.y,
+      cameraTurn.y,
       settings.orbit,
       camera.position,
+      cycleLength,
     ).multiplyScalar(CAMERA_DISTANCE);
     // Small pitch/yaw sway; the camera stays upright in the clear corridor.
-    const pitch = angles.pitch + turn.x,
+    const pitch = angles.pitch + cameraTurn.x,
       yaw = angles.lookYaw;
     cameraTarget
       .set(
@@ -118,16 +120,16 @@ export async function startExperiment() {
       )
       .applyAxisAngle(
         camera.up,
-        orbitYaw(journey.depth, turn.y, settings.orbit),
+        orbitYaw(journey.depth, cameraTurn.y, settings.orbit, cycleLength),
       )
       .add(camera.position);
     camera.lookAt(cameraTarget);
     shells.updateCameraRange(camera);
     renderer.toneMappingExposure = settings.exposure;
   }
-  function render() {
+  function render({ cycleLength = 0, cameraTurn = turn } = {}) {
     if (stopped) return;
-    sync();
+    sync(cycleLength, cameraTurn);
     shells.reflect(renderer, scene, journey, settings.reflections);
     studio.shadow.shadow.needsUpdate = true;
     const current = shells.slots.find(

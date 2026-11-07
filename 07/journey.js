@@ -58,16 +58,19 @@ export function liningColor(id) {
 
 // Only the fractional journey is exponentiated. Every boundary promotes the
 // inner shell to unit size, so neither transforms nor near/far planes drift.
-export function layerState(index, phase, offset) {
+export function layerState(index, phase, offset, cycleLength = 0) {
   const id = index + offset;
+  // Capture can repeat appearances while IDs and relative ages keep advancing.
+  const seed = cycleLength > 0 ? mod(id, cycleLength) : id;
   const age = phase - offset;
   // Opening is elapsed time, not progress toward a stopped end pose.
   const opening = Math.max(0, age - OPEN_START);
   const departureTime = opening / SPLIT_SLOWDOWN;
   return {
     id,
+    seed,
     shape: mod(id + SHAPE_OFFSET, SHAPES.length),
-    color: id,
+    color: seed,
     age,
     scale: BASE_SCALE * RATIO ** (offset - phase),
     opening,
@@ -83,11 +86,11 @@ export function layerState(index, phase, offset) {
     spin: -age * SPIN_RATE,
     // The cut stays oblique to the camera. A small, signed depth tilt leaves
     // the seam readable while its fixed normal points mostly across screen.
-    bearing: seeded(id, 701) * Math.PI * 2,
+    bearing: seeded(seed, 701) * Math.PI * 2,
     tilt:
-      (MIN_SPLIT_TILT + seeded(id, 313) * (MAX_SPLIT_TILT - MIN_SPLIT_TILT)) *
-      (seeded(id, 967) < 0.5 ? -1 : 1),
-    spinOffset: seeded(id, 173) * Math.PI * 2,
+      (MIN_SPLIT_TILT + seeded(seed, 313) * (MAX_SPLIT_TILT - MIN_SPLIT_TILT)) *
+      (seeded(seed, 967) < 0.5 ? -1 : 1),
+    spinOffset: seeded(seed, 173) * Math.PI * 2,
   };
 }
 

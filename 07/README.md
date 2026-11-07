@@ -84,3 +84,27 @@ hollow.manual = false;
 ```
 
 Allow a fresh animation frame between manual renders. `advance(dt)` respects pause; `seek(depth)` selects an exact state. Save captures in the ignored `exports/` directory.
+
+## Video capture
+
+The capture follows the earlier days: **1024 × 1024 H.264 MP4 at 30 fps**, rendered at 1536 × 1536 and downsampled. This sequence runs for **66 seconds**, showing all eleven shapes for six seconds each, starting with the hexagonal bipyramid. The title and collapsed Settings panel are included at √2 UI scale, with no cursor.
+
+Start the local page normally, then run the receiver in another terminal (FFmpeg and ffprobe must be on PATH):
+
+```sh
+python3 scripts/capture-server.py --previews
+```
+
+Set the browser viewport to **1024 × 1024 at device scale 1**, then run:
+
+```js
+await (await import("./scripts/capture-video.js")).captureVideo();
+```
+
+For this recording, appearance seeds repeat after eleven layers and the camera completes one orbit with periodic sine motion. Shape IDs continue advancing, so nesting, shell lifetime, and motion remain continuous. The ordinary interactive journey keeps its independent, nonrepeating colors and orientations.
+
+Sixty-four preceding frames initialize the enclosing shells, reflection probes, and shadows before recording starts. The capture compares the rendered loop endpoint with frame zero before recording and again after the complete sequence. The endpoint is omitted from the video: the last frame is exactly one time step before the first, with no duplicated frame or crossfade. Motion and camera tests also check matching transforms and boundary velocity.
+
+Each lossless PNG is acknowledged before the next frame. The receiver verifies all 1,980 decoded frames, resolution, frame rate, and duration, then writes a JSON report with the shape sequence, loop comparison, and frame hashes. `--previews` saves selected PNGs alongside the video. Outputs go into `exports/`; existing videos are never overwritten. To choose a filename, pass it to the receiver before `--previews`.
+
+`window.captureProgress` reports status and frame count; call `captureProgress.cancel()` to stop. The renderer, camera, journey, settings, and UI are restored afterward. The sequence is defined in `scripts/capture-sequence.js`.

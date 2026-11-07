@@ -169,7 +169,7 @@ export function createShells(environment, background) {
     const shape = geometry.shapes[state.shape];
     slot.solid.geometry = shape.solid;
     for (const half of slot.halves) {
-      setHinge(half, shape.contour, state.id);
+      setHinge(half, shape.contour, state.seed);
       half.meshes[0].geometry = shape.outer;
       half.meshes[1].geometry = shape.inner;
       half.meshes[2].geometry = shape.rim;
@@ -178,10 +178,17 @@ export function createShells(environment, background) {
     group.add(slot.root);
   }
 
-  let lastDepth = null;
-  function update(journey, settings, turnY = 0) {
-    group.rotation.y = orbitYaw(journey.depth, turnY, settings.orbit !== false);
+  let lastDepth = null,
+    lastCycleLength = 0;
+  function update(journey, settings, turnY = 0, cycleLength = 0) {
+    group.rotation.y = orbitYaw(
+      journey.depth,
+      turnY,
+      settings.orbit !== false,
+      cycleLength,
+    );
     const seeking =
+      cycleLength !== lastCycleLength ||
       lastDepth === null ||
       journey.depth < lastDepth - 1e-7 ||
       journey.depth - lastDepth > 1.1;
@@ -199,7 +206,12 @@ export function createShells(environment, background) {
       const slot = slots.find((slot) => !slot.active) || createSlot();
       activate(
         slot,
-        layerState(journey.index, journey.phase, id - journey.index),
+        layerState(
+          journey.index,
+          journey.phase,
+          id - journey.index,
+          cycleLength,
+        ),
       );
     }
     for (const slot of slots) {
@@ -208,6 +220,7 @@ export function createShells(environment, background) {
         journey.index,
         journey.phase,
         slot.id - journey.index,
+        cycleLength,
       );
       slot.root.visible = true;
       slot.state = state;
@@ -232,6 +245,7 @@ export function createShells(environment, background) {
       }
     }
     lastDepth = journey.depth;
+    lastCycleLength = cycleLength;
     materials.roughness.value = settings.roughness;
   }
 
