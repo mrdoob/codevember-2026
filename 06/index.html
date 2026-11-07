@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#665748" />
+    <meta
+      name="description"
+      content="A sunlit brass orrery on travertine. Procedural TSL surfaces, coloured glass, screen-space global illumination and reflections."
+    />
+    <title>Codevember 2026 / 06 / Orrery</title>
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.webgpu.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main
+      aria-label="A brass orrery on a stone pedestal beside a sunlit window"
+    >
+      <canvas
+        tabindex="0"
+        aria-label="Drag a planet to turn time. Drag the background to orbit, scroll to zoom. G toggles SSGI, S toggles SSR, C compares lighting. R resets the view."
+      ></canvas>
+    </main>
+    <header>
+      <span>CODEVEMBER 2026 / 06 / ORRERY</span>
+      <p>Turn the planets · Drag to orbit</p>
+    </header>
+    <div id="status" role="status">Assembling the instrument…</div>
+    <div id="effect-controls" hidden>
+      <div class="effect-row">
+        <button
+          id="ssgi-toggle"
+          type="button"
+          aria-pressed="true"
+          title="Screen-space global illumination · G"
+        >
+          SSGI
+        </button>
+        <button
+          id="ssr-toggle"
+          type="button"
+          aria-pressed="true"
+          title="Screen-space reflections · S"
+        >
+          SSR
+        </button>
+        <button
+          id="compare-toggle"
+          type="button"
+          aria-pressed="false"
+          title="Compare with base lighting · C"
+        >
+          Compare
+        </button>
+      </div>
+    </div>
+    <div id="light-controls" hidden>
+      <div class="effect-row" aria-label="Camera and lighting">
+        <button id="camera-view" type="button">Change View</button>
+        <button id="day-light" type="button" aria-pressed="true">Day</button>
+        <button id="night-light" type="button" aria-pressed="false">
+          Night
+        </button>
+      </div>
+    </div>
+    <div id="comparison" hidden>
+      <div class="comparison-line"></div>
+    </div>
+    <script type="module" src="bootstrap.js"></script>
+  </body>
+</html>

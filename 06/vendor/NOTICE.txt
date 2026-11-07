@@ -1,0 +1,10 @@
+These files are distributed under the accompanying three.js MIT license.
+
+HoustonStratifiedNoise.js
+Source: https://github.com/bhouston/three.js/blob/eb7187278b74e41c7b0ea420ef78d781ee891366/examples/jsm/tsl/utils/HoustonStratifiedNoise.js
+Associated PR: https://github.com/bhouston/three.js/pull/121
+Unmodified snapshot.
+
+SSRNode.js
+Source: three@0.187.0/examples/jsm/tsl/display/SSRNode.js
+Local changes: bindAnalyticNoise replaced by bindHoustonStratifiedNoise at both call sites; imports point to the local HSN module and the pinned three/addons dependencies.
