@@ -3,39 +3,26 @@ import { Clockwork, PLANETS, PINION_TEETH, TAU } from "../motion.js";
 export const FPS = 30;
 export const DURATION = 60;
 export const SHOTS = [
-  { start: 0, end: 7, name: "Day · instrument" },
-  { start: 7, end: 19, name: "Day · planets" },
-  { start: 19, end: 27, name: "Day · overhead" },
-  { start: 27, end: 38, name: "Night · reverse" },
-  { start: 38, end: 49, name: "Night · planets" },
-  { start: 49, end: 60, name: "Return to daylight" },
+  { start: 0, end: 8, name: "Day · instrument" },
+  { start: 8, end: 17, name: "Day · base" },
+  { start: 17, end: 29, name: "Day · overhead turns" },
+  { start: 29, end: 40, name: "Night · reverse" },
+  { start: 40, end: 51, name: "Night · planet turns" },
+  { start: 51, end: 60, name: "Return to daylight" },
 ];
 export const TURNS = [
-  { start: 10.5, duration: 2.8, planet: 4, delta: 5 },
-  { start: 16, duration: 3.2, planet: 1, delta: -10 },
+  { start: 18.5, duration: 2.8, planet: 4, delta: 5 },
+  { start: 23, duration: 3.2, planet: 1, delta: -10 },
   { start: 33, duration: 3, planet: 2, delta: 4 },
-  { start: 42.5, duration: 3.6, planet: 4, delta: -12 },
-  { start: 49, duration: 3.4, planet: 3, delta: -8 },
+  { start: 42, duration: 3.6, planet: 4, delta: -12 },
+  { start: 47.5, duration: 3, planet: 3, delta: -8 },
 ];
 const HERO = [19.6, 0.17, 5.15];
-const PLANET_VIEW = [14.5, 0.24, 5.35];
+const BASE = [9.6, 0.38, 1.25];
 const OVERHEAD = [17.6, 0.62, 4.2];
 const NIGHT = [19.3, 0.22, 5.15];
 const NIGHT_CLOSE = [14.5, 0.28, 5.35];
-const FRAMINGS = [
-  [0, HERO],
-  [7, HERO],
-  [10, PLANET_VIEW],
-  [19, PLANET_VIEW],
-  [23, OVERHEAD],
-  [27, OVERHEAD],
-  [30, NIGHT],
-  [38, NIGHT],
-  [41, NIGHT_CLOSE],
-  [49, NIGHT_CLOSE],
-  [53, HERO],
-  [60, HERO],
-];
+const FRAMINGS = [HERO, BASE, OVERHEAD, NIGHT, NIGHT_CLOSE, HERO];
 
 export function smootherstep(start, end, t) {
   const x = Math.max(0, Math.min(1, (t - start) / (end - start)));
@@ -61,12 +48,10 @@ export function targetClockAt(time) {
 
 export function poseAt(time) {
   const t = ((time % DURATION) + DURATION) % DURATION;
-  let index = FRAMINGS.findIndex(([at]) => at > t);
-  if (index < 1) index = FRAMINGS.length - 1;
-  const [start, a] = FRAMINGS[index - 1],
-    [end, b] = FRAMINGS[index];
-  const f = smootherstep(start, end, t);
-  const [distance, elevation, targetY] = a.map((v, i) => v + (b[i] - v) * f);
+  const index = SHOTS.findIndex((shot) => t >= shot.start && t < shot.end);
+  // Match the Change View button's instant framing changes. Only the azimuth
+  // keeps moving within a shot; there is no camera-position interpolation.
+  const [distance, elevation, targetY] = FRAMINGS[index];
   const azimuth = 0.22 - (TAU * t) / DURATION;
   const radius = distance * Math.cos(elevation);
   const daylight = 1 - smootherstep(27, 32, t) + smootherstep(54, 59, t);
@@ -85,7 +70,7 @@ export function poseAt(time) {
     turn: TURNS.find(
       (turn) => t >= turn.start && t < turn.start + turn.duration,
     ),
-    shot: SHOTS.find((shot) => t >= shot.start && t < shot.end).name,
+    shot: SHOTS[index].name,
   };
 }
 

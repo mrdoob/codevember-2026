@@ -155,9 +155,14 @@ export function createCaptureSession({ renderSize = 1536 } = {}) {
       }
     }
   }
-  let previousShaftMode;
+  let previousShaftMode, previousShot;
   async function draw(frame, settle = 0) {
     applyFrame(app, frame);
+    if (previousShot !== undefined && frame.shot !== previousShot) {
+      app.post.invalidate();
+      settle = Math.max(settle, 32);
+    }
+    previousShot = frame.shot;
     const shaftMode = frame.daylight < 1;
     // Changing between Day and Night rebuilds the effect graph and resets its
     // temporal histories. Converge them off-camera before saving this frame.
@@ -286,6 +291,10 @@ export async function captureVideo({
         orbitDegrees: 360,
         warmupFrames: 64,
         lightingSwitchSettlingFrames: 32,
+        cameraCutSettlingFrames: 32,
+        cameraCuts: SHOTS.slice(1).map((shot) => shot.start),
+        cameraMotion:
+          "Instant view changes with continuous orbit within each shot",
         loop: "Periodic camera, shared mechanical drive, wind, lighting and highlight states; last-to-first motion stays continuous",
         interaction:
           "Five authored turns through the native Clockwork easing; all carriers remain coupled",

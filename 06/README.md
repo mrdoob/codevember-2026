@@ -95,14 +95,15 @@ In a separate experiment tab with a 1024 × 1024 viewport and device scale 1:
 await (await import('./scripts/capture-video.js')).captureVideo();
 ```
 
-The camera completes one continuous 360° orbit, blending between full,
-planet, overhead, reverse, and closer Night views. Five authored turns use
+The camera completes a 360° orbit with instant cuts between a full opening,
+base close-up, overhead, reverse, and closer Night views. Orbiting continues
+within each shot, with no camera transitions. Five authored turns use
 the native Clockwork spring and planet highlights. Night fades in from
 27–32 seconds and returns to Day from 54–59 seconds. The camera, shared
 drive, foliage, and lighting follow closed paths with matching boundary
 velocity. Sixty-four frames of the preceding motion initialize temporal
-histories before frame zero. Day/Night pipeline changes settle for another
-32 unrecorded frames to avoid a noisy flash. Each lossless PNG is acknowledged
+histories before frame zero. Camera cuts and Day/Night pipeline changes settle
+for another 32 unrecorded frames to avoid a noisy flash. Each lossless PNG is acknowledged
 before the next frame; the receiver verifies the encoded count, size, and duration.
 
 The default receiver uses port 8016 and saves a timestamped filename under

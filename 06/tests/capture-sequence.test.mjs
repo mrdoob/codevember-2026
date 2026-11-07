@@ -7,9 +7,10 @@ import {
   DURATION,
   FPS,
   TURNS,
+  SHOTS,
 } from "../scripts/capture-sequence.js";
 
-test("capture completes a continuous 360-degree orbit with matching endpoint pose and velocity", () => {
+test("capture completes a 360-degree orbit with matching loop pose and velocity", () => {
   assert.deepEqual(poseAt(0), poseAt(DURATION));
   const { frames } = createSequence();
   assert.equal(frames.length, 1800);
@@ -29,6 +30,25 @@ test("capture completes a continuous 360-degree orbit with matching endpoint pos
         (Math.PI * 2) / frames.length,
     ) < 1e-10,
   );
+});
+
+test("view changes are instant cuts and the base shot precedes overhead interactions", () => {
+  const framing = (pose) =>
+    Math.hypot(...pose.position.map((p, i) => p - pose.target[i]));
+  for (const shot of SHOTS) {
+    const start = poseAt(shot.start),
+      end = poseAt(shot.end - 1 / FPS);
+    assert.ok(Math.abs(framing(start) - framing(end)) < 1e-10);
+    assert.deepEqual(start.target, end.target);
+    if (shot.start)
+      assert.ok(
+        Math.abs(framing(start) - framing(poseAt(shot.start - 1 / FPS))) > 1,
+      );
+  }
+  assert.match(SHOTS[1].name, /base/);
+  assert.match(SHOTS[2].name, /overhead/);
+  assert.ok(TURNS[0].start > SHOTS[2].start);
+  assert.ok(TURNS[1].start + TURNS[1].duration < SHOTS[2].end);
 });
 
 test("winding, wind and lighting return without a loop reset", () => {
