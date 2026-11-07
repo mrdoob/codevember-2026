@@ -192,7 +192,7 @@ export async function startExperiment() {
       studio.sunLight.intensity =
         settings.sunGlow * Math.PI * studio.sunLight.radius ** 2;
       studio.caustics.update(model, settings);
-      glass.sync(settings);
+      glass.sync(settings, renderer.getPixelRatio());
       document.body.classList.toggle("night", settings.daylight < 0.35);
       renderer.toneMappingExposure = settings.exposure;
       post.configure(settings);
@@ -379,8 +379,19 @@ export async function startExperiment() {
     };
     status.textContent = "Warming the light…";
     syncButtons();
+    gui.hide();
+    canvas.style.pointerEvents = "none";
+    sync();
+    await post.warmup();
+    if (stopped) return;
     render();
+    // GPU submission can return long before the first shader compilation is
+    // complete. Start animation only once this frame is ready to display.
+    await renderer.backend.device.queue.onSubmittedWorkDone();
+    if (stopped) return;
     status.hidden = true;
+    gui.show();
+    canvas.style.pointerEvents = "";
     document.querySelector("#effect-controls").hidden = false;
     document.querySelector("#light-controls").hidden = false;
     function animate(now) {

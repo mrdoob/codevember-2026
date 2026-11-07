@@ -335,6 +335,16 @@ export function createPostProcessing(
       return defocus;
     },
     configure,
+    async warmup() {
+      // Match the pass's visible layers, including the glass, during compilation.
+      const mask = camera.layers.mask;
+      camera.layers.mask = layers.mask;
+      try {
+        await scenePass.compileAsync(renderer);
+      } finally {
+        camera.layers.mask = mask;
+      }
+    },
     invalidate() {
       temporal?.setSize(1, 1);
       giDenoise.reset();

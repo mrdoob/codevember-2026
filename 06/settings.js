@@ -15,6 +15,7 @@ export function createSettings(reducedMotion = false) {
     dofBlur: 3,
     ior: 1.8,
     transmission: 1,
+    refractionBlur: 2,
     absorption: 1.1,
     dispersion: 0.018,
     glassRoughness: 0.075,
@@ -81,6 +82,7 @@ export function createSettingsPanel(
   const glass = gui.addFolder("Glass");
   glass.add(settings, "ior", 1, 1.8, 0.01).name("IOR");
   glass.add(settings, "transmission", 0, 1, 0.01).name("Transmission");
+  glass.add(settings, "refractionBlur", 0, 4, 0.1).name("Refraction blur");
   glass.add(settings, "absorption", 0, 3, 0.01).name("Colour density");
   glass.add(settings, "dispersion", 0, 0.08, 0.001).name("Dispersion");
   glass.add(settings, "glassRoughness", 0.02, 0.35, 0.01).name("Frosting");

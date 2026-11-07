@@ -8,3 +8,7 @@ Unmodified snapshot.
 SSRNode.js
 Source: three@0.187.0/examples/jsm/tsl/display/SSRNode.js
 Local changes: bindAnalyticNoise replaced by bindHoustonStratifiedNoise at both call sites; imports point to the local HSN module and the pinned three/addons dependencies.
+
+../filtered-transmission.js
+Adapted transmission math from three.js PhysicalLightingModel.js at a70ee1ad92a681b7b8c42d23b6ede4febb28b25c (MIT).
+Local change: a minimum refraction sampling LOD, independent of surface roughness.

@@ -12,6 +12,8 @@ import {
   mx_fractal_noise_float,
 } from "three/tsl";
 
+import { FilteredTransmissionLightingModel } from "./filtered-transmission.js";
+
 // Keep Shatter's volume absorption, optical controls and thickness-dependent
 // tint, using the renderer's filtered transmission buffer for stable sampling.
 export function createGlassSystem() {
@@ -19,7 +21,8 @@ export function createGlassSystem() {
     dispersion = uniform(0.018),
     roughness = uniform(0.075),
     attenuationDistance = uniform(1 / 1.1);
-  const glow = uniform(0);
+  const glow = uniform(0),
+    minimumMip = uniform(2);
   const spheres = new Set();
   const localGlow = uniform(0).onObjectUpdate(({ object }) =>
     object.userData.planet === 0 ? 0.22 : 0,
@@ -41,6 +44,9 @@ export function createGlassSystem() {
     clearcoat: 0.35,
     clearcoatRoughness: 0.08,
   });
+  material.setupLightingModel = function () {
+    return new FilteredTransmissionLightingModel(this, minimumMip);
+  };
   material.emissiveNode = pigment
     .mul(glow.add(localGlow))
     .add(mix(pigment, vec3(1), 0.18).mul(dragGlow));
@@ -110,7 +116,10 @@ export function createGlassSystem() {
       }
       return changed;
     },
-    sync(settings) {
+    sync(settings, pixelRatio = 2) {
+      minimumMip.value = Math.log2(
+        Math.max(1, settings.refractionBlur * pixelRatio),
+      );
       const transmission = settings.transmission;
       setEnabled(transmission > 0);
       material.transmission = transmission;
