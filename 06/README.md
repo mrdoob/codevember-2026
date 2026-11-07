@@ -81,7 +81,8 @@ Allow a fresh animation frame between renders because three.js caches pass updat
 
 The capture follows the earlier days: a 60-second, 1024 × 1024 H.264 MP4 at
 30 fps, rendered at 1536 × 1536 and downsampled. It includes the existing text
-controls and subtle interaction rings, with no cursor.
+controls and a persistent interaction circle that follows the drag target,
+with no arrow cursor. The circle fades after release while the planet settles.
 
 Start the receiver with FFmpeg and ffprobe on PATH:
 
@@ -96,10 +97,14 @@ await (await import('./scripts/capture-video.js')).captureVideo();
 ```
 
 The camera completes a 360° orbit with instant cuts between a full opening,
-base close-up, overhead, reverse, and closer Night views. Orbiting continues
-within each shot, with no camera transitions. Five authored turns use
+base close-up, overhead, reverse, and a low Night view beneath the planets
+from 40–51 seconds. The final shot matches the opening. Orbiting continues
+within each shot, and the base close-up gently rises in altitude from 8–17
+seconds while keeping its focal point and distance. Cuts remain instant. Five authored turns use
 the native Clockwork spring and planet highlights. Night fades in from
-27–32 seconds and returns to Day from 54–59 seconds. The camera, shared
+30–35 seconds, after a one-second daylight hold following the cut at 29
+seconds. The first Night drag begins at 36 seconds. Day returns from 54–59
+seconds. The camera, shared
 drive, foliage, and lighting follow closed paths with matching boundary
 velocity. Sixty-four frames of the preceding motion initialize temporal
 histories before frame zero. Camera cuts and Day/Night pipeline changes settle

@@ -2,9 +2,10 @@ import {
   FPS,
   DURATION,
   SHOTS,
+  LIGHTING,
   createSequence,
   applyFrame,
-  smootherstep,
+  dragIndicatorAt,
 } from "./capture-sequence.js";
 
 const SIZE = 1024;
@@ -129,30 +130,29 @@ export function createCaptureSession({ renderSize = 1536 } = {}) {
     text(gui.domElement.querySelector(":scope > .title"), "› SETTINGS", true);
     for (const button of buttons)
       text(button, button.textContent.trim(), true);
-    if (frame.turn) {
-      const age = frame.time - frame.turn.start;
-      if (age < 0.8) {
-        const p = model.planets[frame.turn.planet].body
-          .getWorldPosition(camera.position.clone())
-          .project(camera);
-        const progress = smootherstep(0, 0.8, age);
-        ctx.save();
-        ctx.globalAlpha = (1 - progress) * 0.8;
-        ctx.strokeStyle = "#fff9ed";
-        ctx.lineWidth = 1.5;
-        ctx.shadowColor = "#20190f99";
-        ctx.shadowBlur = 3;
-        ctx.beginPath();
-        ctx.arc(
-          (p.x * 0.5 + 0.5) * SIZE,
-          (-p.y * 0.5 + 0.5) * SIZE,
-          9 + progress * 17,
-          0,
-          Math.PI * 2,
-        );
-        ctx.stroke();
-        ctx.restore();
-      }
+    const indicator = dragIndicatorAt(frame.time);
+    if (indicator) {
+      const p = camera.position
+        .clone()
+        .fromArray(indicator.position)
+        .applyMatrix4(model.group.matrixWorld)
+        .project(camera);
+      ctx.save();
+      ctx.globalAlpha = indicator.opacity;
+      ctx.strokeStyle = "#fff9ed";
+      ctx.lineWidth = 1.5;
+      ctx.shadowColor = "#20190f99";
+      ctx.shadowBlur = 3;
+      ctx.beginPath();
+      ctx.arc(
+        (p.x * 0.5 + 0.5) * SIZE,
+        (-p.y * 0.5 + 0.5) * SIZE,
+        indicator.radius,
+        0,
+        Math.PI * 2,
+      );
+      ctx.stroke();
+      ctx.restore();
     }
   }
   let previousShaftMode, previousShot;
@@ -285,6 +285,9 @@ export async function captureVideo({
         overlays: true,
         cursor: false,
         clickIndicators: true,
+        dragIndicators:
+          "Persistent ring tracks the pointer target throughout each drag; fades after release",
+        lighting: LIGHTING,
         settings: { ...app.settings, pause: false },
         shots: SHOTS,
         turns: sequence.turns,
@@ -294,7 +297,7 @@ export async function captureVideo({
         cameraCutSettlingFrames: 32,
         cameraCuts: SHOTS.slice(1).map((shot) => shot.start),
         cameraMotion:
-          "Instant view changes with continuous orbit within each shot",
+          "Instant cuts with continuous orbit; the base close-up eases upward from 8–17 seconds",
         loop: "Periodic camera, shared mechanical drive, wind, lighting and highlight states; last-to-first motion stays continuous",
         interaction:
           "Five authored turns through the native Clockwork easing; all carriers remain coupled",

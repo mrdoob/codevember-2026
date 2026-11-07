@@ -46,6 +46,11 @@ class Capture:
         for press in metadata.get('pressPlan', []):
             at = round(press['time'] * metadata['fps'])
             self.preview_frames.update(i for i in (at, at + 9, at + 18) if 0 <= i < frames)
+        for turn in metadata.get('turns', []):
+            seconds = [turn['start'] + turn['duration'] * part for part in (.25, .75)]
+            seconds.append(turn['start'] + turn['duration'] + .15)
+            self.preview_frames.update(round(t * metadata['fps']) for t in seconds
+                                       if 0 <= t * metadata['fps'] < frames)
         self.log = self.output.with_suffix('.log').open('wb')
         self.encoder = subprocess.Popen([
             'ffmpeg', '-hide_banner', '-loglevel', 'error', '-n',
