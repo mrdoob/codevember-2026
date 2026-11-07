@@ -82,6 +82,7 @@ export function createPostProcessing(
       material.setupLightingModel = function (builder) {
         const model = setup.call(this, builder);
         if (!model) return model;
+        const sphereLightFarField = this.userData.sphereLightFarField;
         const direct = model.direct;
         model.direct = function (input, builder) {
           if (input.sphereRadius) {
@@ -89,11 +90,15 @@ export function createPostProcessing(
             // In the far field the source is under five degrees in radius.
             // Use the punctual limit on the room, keeping the finite emitter
             // integration for the nearby glass, mechanism and pedestal.
-            If(input.sphereVector.length().lessThan(8), () => {
-              sphereDirect.call(this, input, builder);
-            }).Else(() => {
+            if (sphereLightFarField) {
               direct.call(this, input, builder);
-            });
+            } else {
+              If(input.sphereVector.length().lessThan(8), () => {
+                sphereDirect.call(this, input, builder);
+              }).Else(() => {
+                direct.call(this, input, builder);
+              });
+            }
             areaSpecular.addAssign(
               input.reflectedLight.directSpecular.sub(before),
             );

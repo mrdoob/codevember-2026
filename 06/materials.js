@@ -34,6 +34,16 @@ export function createMaterials() {
   const planets = ["#efbd66", "#2448ba", "#df744c", "#9dbd8b", "#9cc9d3"].map(
     (color) => new THREE.MeshPhysicalNodeMaterial({ color }),
   );
+  for (const [name, material] of Object.entries({
+    "Brass fittings": brass,
+    "Dark bronze hoop": darkMetal,
+    "Bronze base": base,
+    "Brushed bronze pole": pole,
+    "Stone dial": dial,
+    "Ivory rings and moons": ivory,
+    "Opal sun": sun,
+  }))
+    material.name = name;
   const all = [brass, darkMetal, base, pole, dial, ivory, sun, ...planets];
   return {
     brass,

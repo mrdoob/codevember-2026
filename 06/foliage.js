@@ -47,6 +47,7 @@ export function createFoliage(parent, windowRecess = 0) {
     return deform(time);
   })();
   const leaves = new THREE.MeshStandardNodeMaterial({
+    name: "Outdoor leaves",
     roughness: 0.74,
     side: THREE.DoubleSide,
   });
@@ -58,6 +59,7 @@ export function createFoliage(parent, windowRecess = 0) {
   leaves.emissiveNode = pigment.mul(0.28);
   leaves.positionNode = windPosition;
   const wood = new THREE.MeshStandardNodeMaterial({
+    name: "Outdoor branches",
     color: "#786d43",
     roughness: 0.9,
   });

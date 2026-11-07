@@ -23,6 +23,12 @@ export function createStudio(scene, renderer, model) {
   room.scale.set(21 / 26, 1, 21 / 26);
   room.updateMatrixWorld(true);
   const interior = createInterior(room);
+  // Every room surface is over 8 units from the fixed orrery sun (even the
+  // floor is over 10). Omit finite-sphere integration from these shaders.
+  room.traverse((object) => {
+    for (const material of object.material ? [object.material].flat() : [])
+      material.userData.sphereLightFarField = true;
+  });
 
   const environmentScene = new THREE.Scene();
   const surround = new THREE.MeshBasicNodeMaterial({ side: THREE.BackSide });
@@ -138,6 +144,7 @@ export function createStudio(scene, renderer, model) {
   room.add(windowLight, secondWindowLight);
 
   const floorMaterial = travertine({ roughness: 0, bumpStrength: 1.8 });
+  floorMaterial.name = "Travertine pedestal";
   const caustics = createCaustics();
   for (const material of [...interior.receivers, floorMaterial]) {
     material.emissiveNode = caustics.node.mul(

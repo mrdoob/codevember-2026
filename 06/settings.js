@@ -13,7 +13,7 @@ export function createSettings(reducedMotion = false) {
     denoise: true,
     dof: true,
     dofBlur: 3,
-    ior: 1.8,
+    ior: 1.7,
     transmission: 1,
     refractionBlur: 2,
     absorption: 1.1,

@@ -17,7 +17,7 @@ import { FilteredTransmissionLightingModel } from "./filtered-transmission.js";
 // Keep Shatter's volume absorption, optical controls and thickness-dependent
 // tint, using the renderer's filtered transmission buffer for stable sampling.
 export function createGlassSystem() {
-  const ior = uniform(1.8),
+  const ior = uniform(1.7),
     dispersion = uniform(0.018),
     roughness = uniform(0.075),
     attenuationDistance = uniform(1 / 1.1);
@@ -38,6 +38,7 @@ export function createGlassSystem() {
     ({ object }) => object.userData.glassRadius || 1,
   );
   const material = new THREE.MeshPhysicalNodeMaterial({
+    name: "Planet glass",
     transmission: 1,
     metalness: 0,
     roughness: 0.035,

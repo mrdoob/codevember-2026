@@ -627,6 +627,23 @@ export function createInterior(room) {
       object.userData.skipSSR = true;
     }
   });
+  for (const [name, material] of Object.entries({
+    "Plaster walls": wallMaterial,
+    "Oak shelves and trim": wood,
+    "Window stiles": windowWood,
+    "Window rails": railWood,
+    "Door panels": darkWood,
+    "Vase leaves": leaf,
+    "Vase stems": bark,
+    "Door hardware": bronze,
+    "Glazed ceramic vases": ceramic,
+    "Flower petals": petals,
+    "Flower pollen": pollen,
+    Ceiling: ceilingMaterial,
+    "Stone floor tiles": tileMaterial,
+    "Washi paper": glazing,
+  }))
+    material.name = name;
   return {
     nicheLights,
     foliage,

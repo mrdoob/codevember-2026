@@ -24,6 +24,7 @@ export function createPaperFoliage(foliage, parent, opening) {
   const materials = [];
   for (const mesh of foliage.meshes) {
     const material = new THREE.MeshBasicNodeMaterial({
+      name: `Paper capture: ${mesh.material.name}`,
       side: THREE.DoubleSide,
     });
     material.positionNode = mesh.material.positionNode;
