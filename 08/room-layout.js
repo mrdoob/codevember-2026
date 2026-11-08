@@ -5,7 +5,7 @@ export const CEILING_FIXTURE_DEPTH = 1.15;
 export const ROOM_HALF_WIDTH = 9.5;
 export const ROOM_BACK_Z = -8.6;
 
-export const CAMERA_MAX_DISTANCE = 24;
+export const CAMERA_MAX_DISTANCE = 40;
 export const CAMERA_MIN_Y = FLOOR_Y + 0.18;
 export const CAMERA_MAX_Y = CEILING_Y - CEILING_FIXTURE_DEPTH - 0.18;
 // Broad slabs hide their edges beyond the viewing range. Repeated service

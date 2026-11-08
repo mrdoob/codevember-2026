@@ -18,8 +18,8 @@ For static hosting, include `index.html`, `style.css`, the root JavaScript files
 
 ## Controls
 
-- **Drag** to orbit through 360 degrees; scroll or pinch to zoom between 6 and 24 units from the target. A slow automatic orbit is enabled by default, with its toggle and speed under **Camera**.
-- **Change view** switches instantly between seven camera positions and angles.
+- **Drag** to orbit through 360 degrees; scroll or pinch to zoom between 6 and 40 units from the target. A slow automatic orbit is enabled by default, with its toggle and speed under **Camera**.
+- **Change view** switches instantly between the original view and seven angles from the video.
 - **Space**, or **Pause / Play**, to play or pause.
 - **Right arrow** to turn a quarter revolution in 4D.
 - **C** to cycle Multicolor, Blue, Green, and Purple.
@@ -40,7 +40,7 @@ The room's lighting pass runs at half resolution with MSAA. Tubes and fittings r
 
 The floor has a smooth plastic-like coating with **0.15 base roughness**, faint broad color variation, and filtered expansion joints. Six-octave fractal noise creates irregular worn patches, sampled at two scales for broad patch outlines and finer scuff detail within them. **Settings → Rendering → Floor** exposes **Min roughness** (0.15), **Max roughness** (0.6), and **Texture low / high** (0.15 / 1). The first pair bounds surface roughness; the second controls patch coverage and edge contrast. Equal roughness limits produce a uniform finish. The controls keep each range ordered and update live. This detail affects gloss; the surface has no cracks, pits, or granular bump mapping. Concrete texture remains on the columns and ceiling. Four concrete columns have rounded edges, plinths, and steel capitals, placed outside the entire projected motion envelope.
 
-The flat ceiling combines I-beams with web stiffeners and bolted splice plates, insulated round ducts, flanged sheet-metal trunks, access hatches, suspended diffuser boxes and angled louvers. Ladder trays branch into junction boxes with curved cable bundles. Smaller service pipes have couplings, flanges, handwheel valves, and sprinkler drops. Galvanized metal has fine variation in color and roughness. Ceiling assemblies share their geometry across nine instanced bays, covering the full 24-unit camera orbit. Ducts and pipework join at bay boundaries. The floor and flat deck extend 192 units in every horizontal direction so their edges stay beyond the camera's viewing range. The ceiling geometry stays above the sculpture's clearance boundary.
+The flat ceiling combines I-beams with web stiffeners and bolted splice plates, insulated round ducts, flanged sheet-metal trunks, access hatches, suspended diffuser boxes and angled louvers. Ladder trays branch into junction boxes with curved cable bundles. Smaller service pipes have couplings, flanges, handwheel valves, and sprinkler drops. Galvanized metal has fine variation in color and roughness. Ceiling assemblies share their geometry across 25 instanced bays, covering the full 40-unit camera orbit. Ducts and pipework join at bay boundaries. The floor and flat deck extend 320 units in every horizontal direction so their edges stay beyond the camera's viewing range. The ceiling geometry stays above the sculpture's clearance boundary.
 
 **Ceiling shadows** use three broad upward-facing spotlights as proxies for the blue, green, and purple tube groups. Their color and energy follow the actual emitters, including blinking and monochrome settings. Their paths follow the sculpture's eased angular travel, casting filtered PCF shadows during transitions and holding still between poses. Only overhead materials use these lights; the floor, walls, columns, particles, and sculpture retain tube illumination. Each proxy uses one 512×512 shadow map, with a default filter radius of 6. Shadow movement and softness are adjustable, and the shadow toggle preserves the overhead lighting. This is an approximation of colored ceiling illumination, separate from the floor’s tube lighting and column occlusion.
 
@@ -62,7 +62,7 @@ The sculpture is a single hypercube with the 16 vertices and 32 edges of `[-1,1]
 
 The projected origin stays at a fixed height of 1.125 units; the floor is at −3. A nominal scale of 4 enlarges the tesseract to fill the room. Each projected frame receives one uniform scale factor that leaves at least 0.08 units between its largest fittings and the floor, flat ceiling services, or side boundaries. This keeps the proper projected shape and its origin intact while allowing it to approach the room surfaces throughout the morph. The default tube radius is 0.035 units, with adjustment up to 0.06; the fitting margin includes the largest supported joints. At rest, the default tubes have roughly 0.13 units of clearance to the floor and the conservative ceiling boundary. There are no feet or per-frame translations. Projected edge crossings remain a natural part of viewing a 4D object in 3D.
 
-The sculpture’s morph does not drive the camera framing. The initial framing accommodates the full rotation envelope, and narrow viewports center the installation. Automatic orbit takes approximately two minutes per revolution at the default speed. Dragging temporarily takes control, and pausing also stops automatic orbit. **Change view** visits seven presets, from close floor-level views to elevated and distant angles. Horizontal orbit is unrestricted; the near side wall cuts away when the camera moves outside it. Camera altitude is constrained between −2.82 and 5.07, leaving clearance above the floor and below the ceiling services. Orbit and zoom remain available.
+The sculpture’s morph does not drive the camera framing. The original initial framing accommodates the full rotation envelope, and narrow viewports center the installation. Automatic orbit takes approximately two minutes per revolution at the default speed. Dragging temporarily takes control, and pausing also stops automatic orbit. **Change view** keeps that original view, then switches instantly through seven video angles: side, ceiling, floor, low reflections, tube detail, ceiling-height pullback, and distant orbit. These presets use each shot’s midpoint, target, lens, and roll. Horizontal orbit is unrestricted; the near side wall cuts away when the camera moves outside it. Camera altitude is constrained between −2.82 and 5.07, leaving clearance above the floor and below the ceiling services. Orbit and zoom remain available out to 40 units, with the floor and ceiling covering that range.
 
 **Inside out**, the default, uses XW rotation alone. Each pose holds for four simulation seconds, followed by a six-second transition with quintic easing: two seconds still and three seconds moving at default speed 2. Each transition advances 45 degrees, completing one revolution in 40 real seconds. Rotations remain orthogonal throughout, preserving the hypercube's form.
 
@@ -90,7 +90,8 @@ Alternative modes remain in Settings: **Coupled rotation** combines XW rotation 
 | `airflow.js`          | Independent 3D fluid solver, pressure projection, circulation, and column boundaries.        |
 | `particles.js`        | GPU dust advection, 120,000 soft instanced grains, cached lighting, and depth occlusion.     |
 | `post-processing.js`  | Room/foreground composition, bloom, grading, and antialiasing.                               |
-| `camera-framing.js`   | Responsive framing and seven camera presets.                                                 |
+| `camera-framing.js`   | Responsive framing and the original view plus seven video presets.                            |
+| `camera-shots.js`     | Shared video camera paths and edit order.                                                     |
 | `main.js`             | Input, timing, rendering, and lifecycle.                                                     |
 | `settings.js`         | Defaults and settings panel.                                                                 |
 
@@ -116,6 +117,38 @@ tesseract.manual = false;
 ```
 
 `window.tesseract` also exposes the room, neon and particle scenes, renderer, camera, controls, settings, sculpture, particles, irradiance field, fluid solver, and post-processing passes. `advance(dt)` respects pause, advances the morph by `dt × speed`, and advances the air clock `lightTime` by `dt`. `seek(seconds)` resets these clocks and derives angular travel for deterministic capture. Blinking and ceiling movement advance with angular travel when rendering; fluid motion uses the independent air clock. Save screenshots in the ignored `exports/` directory.
+
+## Video capture
+
+The silent video uses the earlier days’ format: **70 seconds, 1024 × 1024 H.264 MP4 at 30 fps**, rendered at 1536 × 1536 and downsampled. Seven long camera shots are joined by hard cuts. The raw capture rolls gradually on shots three, five, and seven; the others keep a level camera. Shot one is a 12-second rear orbit at a constant 36-unit distance. The final edit orders the raw shots **2, 3, 6, 5, 4, 7, 1**, ending with that orbit. Animation and fluid motion advance continuously during capture; editing preserves the motion within each shot.
+
+| Capture time | Camera                                                           |
+| ------- | --------------------------------------------------------------------- |
+| 0–12 s  | Level rear orbit through 40°, at a constant 36-unit distance.          |
+| 12–22 s | Track around the left side, with column parallax.                     |
+| 22–32 s | Upward view of the lit ceiling, with the sculpture at the lower edge. |
+| 32–40 s | Close view of the tubes, fittings, and illuminated dust.              |
+| 40–50 s | Low lateral pass across the floor reflections.                        |
+| 50–60 s | Downward tracking view of floor illumination and reflections.         |
+| 60–70 s | Wide pullback just below the ceiling fixtures, rising from y=4.8 to 5. |
+
+With the experiment running on port 8008, start the receiver:
+
+```sh
+python3 scripts/capture-server.py --previews
+```
+
+In a separate browser tab with a **1024 × 1024 viewport and device scale 1**:
+
+```js
+await (await import("./scripts/capture-video.js")).captureVideo();
+```
+
+The title, dedication, and collapsed Settings label are included at √2 UI scale; the cursor and footer buttons are omitted. The camera paths are shared with the app in `camera-shots.js`, re-exported by `scripts/capture-sequence.js`. `captureVideo({ duration: 5 })` records just the first five seconds for a quick check.
+
+Each lossless PNG is acknowledged by the receiver before the next frame is sent, keeping memory bounded. FFmpeg encodes with two threads. The receiver verifies decoded frame count, resolution, frame rate, and duration, then saves a JSON report with the shot plan and source frame hashes. `--previews` also saves selected stills. Outputs go into the ignored `exports/` directory, and existing videos are never overwritten.
+
+`window.captureProgress` reports status and frame count; call `captureProgress.cancel()` to stop. The camera, settings, controls, renderer, and UI are restored afterward; the particle simulation resets when restoring the previous animation time.
 
 ## References and license
 

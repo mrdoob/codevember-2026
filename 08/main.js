@@ -22,7 +22,6 @@ import { COLOR_MODES } from "./neon-pattern.js";
 import {
   CAMERA_OFFSET,
   TARGET_OFFSET,
-  CAMERA_ROLL,
   CAMERA_VIEWS,
   framing,
 } from "./camera-framing.js";
@@ -94,7 +93,7 @@ export async function startExperiment() {
     const width = innerWidth,
       height = innerHeight;
     camera.aspect = width / height;
-    const composition = framing(camera.aspect);
+    const composition = framing(camera.aspect, viewIndex);
     camera.fov = composition.fov;
     if (controls) {
       camera.position.x += composition.x - controls.target.x;
@@ -141,17 +140,23 @@ export async function startExperiment() {
   }
   function changeView() {
     viewIndex = (viewIndex + 1) % CAMERA_VIEWS.length;
-    const x = framing(camera.aspect).x;
-    const position = new THREE.Vector3(...CAMERA_VIEWS[viewIndex]);
-    position.x += x - TARGET_OFFSET[0];
-    position.y += FLOAT_HEIGHT;
-    const target = new THREE.Vector3(x, FLOAT_HEIGHT + TARGET_OFFSET[1], 0);
+    const view = CAMERA_VIEWS[viewIndex];
+    const composition = framing(camera.aspect, viewIndex);
+    const position = new THREE.Vector3(...view.position);
+    const target = new THREE.Vector3(...view.target);
+    if (viewIndex === 0) {
+      position.x += composition.x - TARGET_OFFSET[0];
+      position.y += FLOAT_HEIGHT;
+      target.set(composition.x, FLOAT_HEIGHT + TARGET_OFFSET[1], 0);
+    }
     // Clear pending orbit inertia before switching directly to the preset.
     controls.autoRotate = false;
     controls.enableDamping = false;
     controls.update(0);
     camera.position.copy(position);
     controls.target.copy(target);
+    camera.fov = composition.fov;
+    camera.updateProjectionMatrix();
     controls.update(0);
     controls.enableDamping = !reducedMotion.matches;
     controls.autoRotate = settings.autoOrbit && !paused;
@@ -182,7 +187,7 @@ export async function startExperiment() {
     }
     dirty = true;
   }
-  function render() {
+  function render({ cameraRoll = CAMERA_VIEWS[viewIndex].roll } = {}) {
     if (disposed) return;
     const pose = poseMotion(time, settings.motion);
     if (blinkMode === settings.motion) {
@@ -202,7 +207,7 @@ export async function startExperiment() {
       CAMERA_MAX_Y,
     );
     camera.lookAt(controls.target);
-    camera.rotateZ(CAMERA_ROLL);
+    camera.rotateZ(cameraRoll);
     sculpture.group.updateMatrixWorld(true);
     // Both blinking and ceiling shadows follow accumulated angular travel,
     // so they ease with the sculpture and retain their last state at rest.
@@ -221,8 +226,9 @@ export async function startExperiment() {
   controls.enablePan = false;
   controls.minDistance = 6;
   controls.maxDistance = CAMERA_MAX_DISTANCE;
-  controls.minPolarAngle = Math.PI * 0.4;
-  controls.maxPolarAngle = Math.PI * 0.62;
+  // The ceiling and floor views need steeper aim; render constrains altitude.
+  controls.minPolarAngle = 0;
+  controls.maxPolarAngle = Math.PI;
   controls.minAzimuthAngle = -Infinity;
   controls.maxAzimuthAngle = Infinity;
   controls.autoRotate = settings.autoOrbit && !paused;
