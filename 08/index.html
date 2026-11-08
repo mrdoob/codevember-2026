@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#020306" />
+    <meta
+      name="description"
+      content="A love letter to @nonotakstudio. A neon tesseract illuminates a dark industrial space with analytical tube area lights. Codevember 2026."
+    />
+    <title>Codevember 2026 / 08 / Tesseract</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <canvas
+        tabindex="0"
+        aria-label="A neon tesseract lighting a dark industrial room. Drag to orbit. Scroll or pinch to zoom. Space to pause."
+      ></canvas>
+    </main>
+    <header>
+      <span>CODEVEMBER 2026 / 08 / TESSERACT</span>
+      <p>A love letter to @nonotakstudio</p>
+    </header>
+    <footer>
+      <button id="change-view" type="button" aria-label="Change camera view">
+        CHANGE VIEW
+      </button>
+      <button id="pause" type="button" aria-label="Pause animation">
+        PAUSE
+      </button>
+    </footer>
+    <div id="status" role="status">Warming up the neon…</div>
+    <script type="module" src="bootstrap.js"></script>
+  </body>
+</html>

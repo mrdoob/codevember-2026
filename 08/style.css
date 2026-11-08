@@ -1,0 +1,143 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #020306;
+  color: #bec2d4;
+  font:
+    11px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+[hidden] {
+  display: none !important;
+}
+main {
+  position: fixed;
+  inset: 0;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+}
+canvas:active {
+  cursor: grabbing;
+}
+canvas:focus-visible {
+  outline: 1px solid #626d72;
+  outline-offset: -5px;
+}
+header {
+  position: fixed;
+  z-index: 2;
+  top: 24px;
+  left: 28px;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+}
+header p {
+  margin: 6px 0 0;
+  color: #797e94;
+  letter-spacing: 0;
+}
+footer {
+  position: fixed;
+  z-index: 2;
+  bottom: 24px;
+  left: 28px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  color: #797e94;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  pointer-events: none;
+}
+footer button {
+  pointer-events: auto;
+  appearance: none;
+  border: 0;
+  padding: 12px 0 12px 20px;
+  background: transparent;
+  color: #bec2d4;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+}
+footer button:focus-visible {
+  outline: 1px solid #626d72;
+  outline-offset: 4px;
+}
+#status {
+  position: fixed;
+  inset: 50% 24px auto;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.lil-gui.root {
+  top: 20px;
+  right: 28px;
+}
+.lil-gui.root,
+.lil-gui.root .lil-gui {
+  --background-color: rgb(14 17 28 / 0.94);
+  --text-color: #bec2d4;
+  --title-background-color: transparent;
+  --title-text-color: #bec2d4;
+  --widget-color: #282c40;
+  --hover-color: #363c54;
+  --focus-color: #414967;
+  --number-color: #c4c2ff;
+  --string-color: #c4c2ff;
+  --font-size: 11px;
+}
+.lil-gui.root,
+.lil-gui.root * {
+  text-transform: uppercase;
+}
+.lil-gui.root.closed {
+  background-color: transparent;
+}
+.lil-gui.root .lil-gui {
+  background-color: transparent;
+}
+.lil-gui.root .title {
+  position: relative;
+  text-align: center;
+}
+.lil-gui.root .title::before {
+  position: static;
+  padding-right: 2px;
+}
+@media (max-width: 600px) {
+  header {
+    top: 20px;
+    left: 16px;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+  }
+  header p {
+    font-size: 9px;
+  }
+  footer {
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
+    font-size: 8px;
+  }
+  .lil-gui.root {
+    right: 16px;
+    top: 76px;
+  }
+}

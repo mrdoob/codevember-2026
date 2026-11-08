@@ -1,0 +1,12 @@
+{
+  "name": "codevember-2026-tesseract",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "python3 scripts/serve.py",
+    "test": "node --max-old-space-size=512 --test --test-concurrency=1 tests/*.test.mjs"
+  },
+  "devDependencies": {
+    "three": "0.187.0"
+  }
+}

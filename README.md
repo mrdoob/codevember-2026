@@ -13,7 +13,7 @@ Following the [prompt list shared by @thespite](https://x.com/thespite/status/21
 | 05 | Moss | [View](https://mrdoob.github.io/codevember-2026/05/) | [Code](05/) |
 | 06 | Orrery | [View](https://mrdoob.github.io/codevember-2026/06/) | [Code](06/) |
 | 07 | Hollow | [View](https://mrdoob.github.io/codevember-2026/07/) | [Code](07/) |
-| 08 | Tesseract | — | — |
+| 08 | Tesseract | [View](https://mrdoob.github.io/codevember-2026/08/) | [Code](08/) |
 | 09 | Membrane | — | — |
 | 10 | Caustic | — | — |
 | 11 | Rust | — | — |
