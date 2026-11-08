@@ -84,15 +84,13 @@ export async function startExperiment() {
   let lastTime = null,
     dirty = true,
     frame = 0;
-  let viewIndex = 0,
-    viewTransition = null;
+  let viewIndex = 0;
   const turn = { x: 0, y: 0, targetX: 0, targetY: 0 };
 
   function changed() {
     dirty = true;
   }
   function resize() {
-    cancelViewTransition();
     const width = innerWidth,
       height = innerHeight;
     camera.aspect = width / height;
@@ -116,14 +114,12 @@ export async function startExperiment() {
   }
   function pause(value = !paused) {
     paused = value;
-    if (controls)
-      controls.autoRotate = settings.autoOrbit && !paused && !viewTransition;
+    if (controls) controls.autoRotate = settings.autoOrbit && !paused;
     lastTime = null;
     updatePauseLabel();
     dirty = true;
   }
   function reset() {
-    cancelViewTransition();
     viewIndex = 0;
     time = lightTime = blinkTime = 0;
     previousTravel = 0;
@@ -143,10 +139,6 @@ export async function startExperiment() {
     if (reducedMotion.matches) turn.x = turn.targetX;
     dirty = true;
   }
-  function cancelViewTransition() {
-    viewTransition = null;
-    if (controls) controls.enableDamping = !reducedMotion.matches;
-  }
   function changeView() {
     viewIndex = (viewIndex + 1) % CAMERA_VIEWS.length;
     const x = framing(camera.aspect).x;
@@ -154,35 +146,16 @@ export async function startExperiment() {
     position.x += x - TARGET_OFFSET[0];
     position.y += FLOAT_HEIGHT;
     const target = new THREE.Vector3(x, FLOAT_HEIGHT + TARGET_OFFSET[1], 0);
+    // Clear pending orbit inertia before switching directly to the preset.
     controls.autoRotate = false;
     controls.enableDamping = false;
     controls.update(0);
-    if (reducedMotion.matches) {
-      camera.position.copy(position);
-      controls.target.copy(target);
-      controls.update(0);
-      cancelViewTransition();
-    } else {
-      viewTransition = {
-        from: camera.position.clone(),
-        to: position,
-        fromTarget: controls.target.clone(),
-        toTarget: target,
-        elapsed: 0,
-      };
-    }
-    dirty = true;
-  }
-  function updateView(dt) {
-    const move = viewTransition;
-    move.elapsed += dt;
-    const progress = Math.min(1, move.elapsed / 1.1);
-    const eased = progress ** 3 * (progress * (progress * 6 - 15) + 10);
-    camera.position.lerpVectors(move.from, move.to, eased);
-    controls.target.lerpVectors(move.fromTarget, move.toTarget, eased);
+    camera.position.copy(position);
+    controls.target.copy(target);
     controls.update(0);
+    controls.enableDamping = !reducedMotion.matches;
+    controls.autoRotate = settings.autoOrbit && !paused;
     dirty = true;
-    if (progress === 1) cancelViewTransition();
   }
   function seek(seconds) {
     if (!Number.isFinite(seconds)) throw new RangeError("Time must be finite.");
@@ -259,7 +232,6 @@ export async function startExperiment() {
   controls.update(0);
   controls.saveState();
   controls.addEventListener("change", changed);
-  controls.addEventListener("start", cancelViewTransition);
   gui = createSettingsPanel(settings, {
     pause,
     reset,
@@ -316,11 +288,8 @@ export async function startExperiment() {
   reducedMotion.addEventListener(
     "change",
     () => {
-      if (reducedMotion.matches) {
-        if (viewTransition) updateView(1.1);
-        pause(true);
-      }
-      controls.enableDamping = !reducedMotion.matches && !viewTransition;
+      if (reducedMotion.matches) pause(true);
+      controls.enableDamping = !reducedMotion.matches;
     },
     eventOptions,
   );
@@ -334,10 +303,9 @@ export async function startExperiment() {
     }
     const dt = lastTime === null ? 0 : Math.min((now - lastTime) / 1000, 0.1);
     lastTime = now;
-    controls.autoRotate = settings.autoOrbit && !paused && !viewTransition;
+    controls.autoRotate = settings.autoOrbit && !paused;
     controls.autoRotateSpeed = settings.orbitSpeed;
-    if (viewTransition) updateView(dt);
-    else controls.update(dt);
+    controls.update(dt);
     const easing = 1 - Math.exp(-dt * 9);
     if (
       Math.abs(turn.targetX - turn.x) + Math.abs(turn.targetY - turn.y) >

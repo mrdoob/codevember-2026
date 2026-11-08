@@ -19,14 +19,14 @@ For static hosting, include `index.html`, `style.css`, the root JavaScript files
 ## Controls
 
 - **Drag** to orbit through 360 degrees; scroll or pinch to zoom between 6 and 24 units from the target. A slow automatic orbit is enabled by default, with its toggle and speed under **Camera**.
-- **Change view** cycles through seven camera positions and angles with a 1.1-second eased transition. Dragging interrupts the transition.
+- **Change view** switches instantly between seven camera positions and angles.
 - **Space**, or **Pause / Play**, to play or pause.
 - **Right arrow** to turn a quarter revolution in 4D.
 - **C** to cycle Multicolor, Blue, Green, and Purple.
 - **R** to restart and restore the camera.
 - **Settings** controls rotation, perspective, radiance, tube radius, room illumination, random blinking, blink speed, electrical shimmer, floor roughness, bloom, particles, ceiling shadows, exposure, and resolution.
 
-Reduced-motion preferences start paused and make camera changes and quarter turns immediate. Hidden tabs stop advancing. Paused scenes stop rendering when camera damping and manual rotation settle.
+Reduced-motion preferences start paused and make quarter turns immediate. Hidden tabs stop advancing. Paused scenes stop rendering when camera damping and manual rotation settle.
 
 ## Tube area lights
 
