@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#080f12" />
+    <meta
+      name="description"
+      content="Membrane. Explore standing waves through white sand and flowing soap. A procedural WebGPU experiment for Codevember 2026."
+    />
+    <title>Codevember 2026 / 09 / Membrane</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.187.0/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.187.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <canvas
+        tabindex="0"
+        aria-label="A steady wave shape with flowing soap-film iridescence. Drag to orbit, scroll to zoom. Space pauses. Left and right arrows change resonance. R resets particles and fluid. S toggles sound."
+      ></canvas>
+    </main>
+    <header>
+      <span>CODEVEMBER 2026 / 09 / MEMBRANE</span>
+      <p>Explore standing waves through white sand and flowing soap.</p>
+    </header>
+    <footer>
+      <div id="readout">
+        <div id="frequency-control">
+          <span id="frequency-value"
+            ><span id="frequency">223.2</span><span class="unit">Hz</span></span
+          >
+          <div id="frequency-tuning">
+            <button
+              id="previous"
+              class="resonance-step"
+              aria-label="Previous resonance"
+              title="Previous resonance"
+            >
+              <svg viewBox="0 0 12 12" aria-hidden="true">
+                <path d="M7.5 2 3.5 6l4 4" />
+              </svg>
+            </button>
+            <div id="frequency-track">
+              <input
+                id="frequency-slider"
+                type="range"
+                min="40"
+                max="300"
+                step="0.1"
+                value="223.2"
+                list="frequency-stops"
+                aria-label="Drive frequency"
+                aria-valuetext="223.2 Hz"
+              />
+              <div id="frequency-marks" aria-hidden="true"></div>
+            </div>
+            <datalist id="frequency-stops"></datalist>
+            <button
+              id="next"
+              class="resonance-step"
+              aria-label="Next resonance"
+              title="Next resonance"
+            >
+              <svg viewBox="0 0 12 12" aria-hidden="true">
+                <path d="m4.5 2 4 4-4 4" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      <nav aria-label="Experiment controls">
+        <button id="wave" aria-pressed="true">Wave</button>
+        <button id="particles" aria-pressed="false">Particles</button>
+        <button id="sound" aria-pressed="false">Sound</button>
+        <button id="reset">Reset</button>
+      </nav>
+    </footer>
+    <div id="status" role="status">Tensioning the membrane…</div>
+    <script type="module" src="bootstrap.js"></script>
+  </body>
+</html>

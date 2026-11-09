@@ -1,0 +1,296 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #080f12;
+  color: #c6ced0;
+  font:
+    11px/1.5 ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+}
+[hidden] {
+  display: none !important;
+}
+main {
+  position: fixed;
+  inset: 0;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: grab;
+  outline: none;
+}
+canvas:active {
+  cursor: grabbing;
+}
+canvas:focus-visible {
+  outline: 1px solid #9a987f;
+  outline-offset: -5px;
+}
+header {
+  position: fixed;
+  z-index: 2;
+  top: 24px;
+  left: 28px;
+  letter-spacing: 0.16em;
+  pointer-events: none;
+}
+header p {
+  margin: 6px 0 0;
+  color: #85877c;
+  letter-spacing: 0;
+}
+footer {
+  position: fixed;
+  z-index: 2;
+  bottom: 24px;
+  left: 28px;
+  right: 28px;
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  pointer-events: none;
+}
+#readout {
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: #c8c6b3;
+}
+#readout .unit {
+  font-size: 10px;
+  color: #85877c;
+  letter-spacing: 0.04em;
+}
+#frequency-control {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#frequency-tuning {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+#frequency-track {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: clamp(110px, 16vw, 180px);
+  height: 32px;
+}
+#frequency-marks {
+  position: absolute;
+  left: 4.5px;
+  right: 4.5px;
+  bottom: 3px;
+  height: 4px;
+  pointer-events: none;
+}
+#frequency-marks span {
+  position: absolute;
+  width: 1px;
+  height: 4px;
+  background: #747969;
+  transform: translateX(-0.5px);
+}
+#frequency-marks span.active {
+  height: 6px;
+  top: -1px;
+  background: #ebd69f;
+}
+.resonance-step {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 32px;
+  flex-shrink: 0;
+  padding: 0;
+}
+.resonance-step svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#frequency-value {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+  width: 7.2ch;
+  flex-shrink: 0;
+}
+#frequency-slider {
+  --frequency-progress: 70.46%;
+  appearance: none;
+  pointer-events: auto;
+  width: 100%;
+  height: 28px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  background: linear-gradient(
+      to right,
+      #b7b49a var(--frequency-progress),
+      #424943 var(--frequency-progress)
+    )
+    center / 100% 2px no-repeat;
+  cursor: pointer;
+  touch-action: pan-y;
+}
+#frequency-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: transparent;
+}
+#frequency-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 9px;
+  height: 9px;
+  margin-top: -3.5px;
+  border: 0;
+  border-radius: 50%;
+  background: #d4cfb5;
+}
+#frequency-slider::-moz-range-track {
+  height: 2px;
+  background: transparent;
+}
+#frequency-slider::-moz-range-thumb {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 50%;
+  background: #d4cfb5;
+}
+#frequency-slider:focus-visible {
+  outline: 1px solid #969b85;
+  outline-offset: 4px;
+}
+nav {
+  --control-gap: 24px;
+  display: flex;
+  gap: var(--control-gap);
+  align-items: center;
+  flex-shrink: 0;
+  white-space: nowrap;
+  margin-left: auto;
+}
+button {
+  pointer-events: auto;
+  appearance: none;
+  background: none;
+  border: 0;
+  color: #b6b8aa;
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 12px 0;
+  cursor: pointer;
+}
+button:hover {
+  color: #fff6d4;
+}
+button[aria-pressed="true"] {
+  color: #ebd69f;
+}
+button:focus-visible {
+  outline: 1px solid #969b85;
+  outline-offset: 5px;
+}
+#status {
+  position: fixed;
+  inset: 50% 24px auto;
+  text-align: center;
+  letter-spacing: 0.04em;
+}
+.lil-gui.root {
+  top: 20px;
+  right: 28px;
+}
+.lil-gui.root,
+.lil-gui.root .lil-gui {
+  --background-color: rgb(27 29 25 / 0.96);
+  --text-color: #c7c6b9;
+  --title-background-color: transparent;
+  --title-text-color: #c7c6b9;
+  --widget-color: #3c4036;
+  --hover-color: #505447;
+  --focus-color: #626555;
+  --number-color: #e1d4a6;
+  --string-color: #e1d4a6;
+  --font-size: 11px;
+}
+.lil-gui.root,
+.lil-gui.root * {
+  text-transform: uppercase;
+}
+.lil-gui.root.closed,
+.lil-gui.root .lil-gui {
+  background-color: transparent;
+}
+.lil-gui.root .title {
+  text-align: center;
+}
+.lil-gui.root .title::before {
+  position: static;
+  padding-right: 2px;
+}
+@media (max-width: 600px) {
+  header {
+    top: 20px;
+    left: 16px;
+    font-size: 10px;
+    letter-spacing: 0.09em;
+  }
+  header p {
+    font-size: 9px;
+    max-width: calc(100vw - 32px);
+  }
+  .lil-gui.root {
+    right: 16px;
+    top: 76px;
+  }
+  footer {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  nav {
+    --control-gap: 14px;
+    margin-left: auto;
+  }
+  button {
+    font-size: 9px;
+    letter-spacing: 0.02em;
+  }
+  #readout {
+    font-size: 16px;
+    min-width: 0;
+  }
+}
+@media (max-width: 380px) {
+  nav {
+    --control-gap: 8px;
+  }
+  button {
+    font-size: 8.5px;
+  }
+}
