@@ -217,6 +217,16 @@ export function createMarineLife(scene, optics) {
     tintData.set(fish.instanceColor.array.subarray(i * 3, i * 3 + 3), i * 4);
   const fishTints = buffer(tintData, "vec4", fish.count);
   fish.instanceColor = null;
+  // Native transmitted shadows retain each school's color. Thin fins pass
+  // more light than the body; eyes remain opaque. This only filters sunlight
+  // in the shadow map and does not add emission or transparent surface draws.
+  fishMaterial.castShadowNode = vec4(
+    eye.select(
+      vec3(0),
+      fishTints.element(instanceIndex).rgb.mul(fin.select(0.55, 0.22)),
+    ),
+    1,
+  );
   fishMaterial.colorNode = Fn(() => {
     const tint = fishTints.element(instanceIndex).rgb;
     const stripe = positionGeometry.y

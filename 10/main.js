@@ -28,6 +28,7 @@ export async function startExperiment() {
   renderer.toneMappingExposure = COLOR_GRADING_DEFAULTS.exposure;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.transmitted = true;
   const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
   const settings = {
     speed: 1,

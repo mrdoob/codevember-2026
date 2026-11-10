@@ -9,7 +9,8 @@ export const FISH_SCHOOLS = [
     hue: 0.025,
     hueRange: 0.065,
     accent: "#e85c25",
-    phase: -0.9,
+    // Enter the opening view from the right, with the sphere clear at startup.
+    phase: 1.05,
     speed: -0.055,
     depthPhase: 1.1,
   },
