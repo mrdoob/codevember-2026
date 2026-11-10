@@ -15,7 +15,7 @@ Following the [prompt list shared by @thespite](https://x.com/thespite/status/21
 | 07 | Hollow | [View](https://mrdoob.github.io/codevember-2026/07/) | [Code](07/) |
 | 08 | Tesseract | [View](https://mrdoob.github.io/codevember-2026/08/) | [Code](08/) |
 | 09 | Membrane | [View](https://mrdoob.github.io/codevember-2026/09/) | [Code](09/) |
-| 10 | Caustic | — | — |
+| 10 | Caustic | [View](https://mrdoob.github.io/codevember-2026/10/) | [Code](10/) |
 | 11 | Rust | — | — |
 | 12 | Feather | — | — |
 | 13 | Labyrinth | — | — |

@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#295661" />
+    <meta
+      name="description"
+      content="Caustic. A sunken observatory of light. An interactive, procedural Codevember experiment."
+    />
+    <title>Codevember 2026 / 10 / Caustic</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.webgpu.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <canvas
+        tabindex="0"
+        aria-label="A glass sphere suspended in a sunken stone rotunda. Drag to orbit, scroll to zoom, double click to ripple the water. Space pauses."
+      ></canvas>
+    </main>
+    <header>
+      <span>CODEVEMBER 2026 / 10 / CAUSTIC</span>
+      <p>A sunken observatory of light.</p>
+    </header>
+    <footer>
+      <nav aria-label="Experiment controls">
+        <button id="ripple">Ripple</button>
+        <button id="view">Change view</button>
+        <button id="pause" aria-label="Pause animation">Pause</button>
+      </nav>
+    </footer>
+    <div id="status" role="status">Gathering the light…</div>
+    <script type="module" src="bootstrap.js"></script>
+  </body>
+</html>
