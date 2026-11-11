@@ -139,23 +139,6 @@ h1 {
   color: inherit;
 }
 
-/* Keyboard navigation */
-
-.skip-link {
-  position: fixed;
-  z-index: 2;
-  top: 16px;
-  left: 16px;
-  padding: 12px 18px;
-  background: #efefec;
-  color: #141414;
-  transform: translateY(-150%);
-}
-
-.skip-link:focus {
-  transform: none;
-}
-
 /* Responsive layout */
 
 @media (max-width: 1300px) {
