@@ -1,0 +1,208 @@
+:root {
+  color-scheme: dark;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  color: #efefec;
+  background: #141414;
+  font-synthesis: none;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  text-transform: uppercase;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+a:focus-visible {
+  outline: 2px solid #efefec;
+  outline-offset: 5px;
+}
+
+.page {
+  max-width: 1600px;
+  margin: auto;
+  padding: 0 32px 32px;
+}
+
+/* Header */
+
+header {
+  --top-space: 56px;
+
+  position: relative;
+  padding: var(--top-space) 0 48px;
+}
+
+h1 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 19px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: .02em;
+}
+
+.byline {
+  color: #777;
+  font-size: .75em;
+  letter-spacing: 0;
+}
+
+.prompt-credit {
+  position: absolute;
+  top: var(--top-space);
+  right: 0;
+  margin: 0;
+  color: #888;
+  font-size: 10px;
+  line-height: 20px;
+  letter-spacing: .04em;
+}
+
+.prompt-credit a:hover,
+.byline a:hover {
+  color: #efefec;
+}
+
+/* Shared title and day labels */
+
+.title-label,
+.label {
+  padding: 2px 8px;
+  background: #fff;
+  color: #141414;
+}
+
+/* Gallery */
+
+.grid {
+  --columns: 8;
+
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  gap: 12px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.grid > li {
+  position: relative;
+  aspect-ratio: 1;
+}
+
+.experiment {
+  display: block;
+  height: 100%;
+}
+
+.experiment img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.label {
+  position: absolute;
+  z-index: 1;
+  top: 87.5%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: max-content;
+  max-width: calc(100% - 16px);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: .08em;
+  text-align: center;
+}
+
+.placeholder {
+  background: #181818;
+  color: #888;
+}
+
+.placeholder .label {
+  background: transparent;
+  color: inherit;
+}
+
+/* Keyboard navigation */
+
+.skip-link {
+  position: fixed;
+  z-index: 2;
+  top: 16px;
+  left: 16px;
+  padding: 12px 18px;
+  background: #efefec;
+  color: #141414;
+  transform: translateY(-150%);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+/* Responsive layout */
+
+@media (max-width: 1300px) {
+  .grid {
+    --columns: 6;
+  }
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    --columns: 5;
+  }
+}
+
+@media (max-width: 900px) {
+  .grid {
+    --columns: 4;
+  }
+}
+
+@media (max-width: 700px) {
+  .page {
+    padding: 0 16px 24px;
+  }
+
+  header {
+    --top-space: 36px;
+
+    padding-bottom: 32px;
+  }
+
+  .prompt-credit {
+    line-height: 17px;
+  }
+
+  h1 {
+    font-size: 16px;
+  }
+
+  .grid {
+    --columns: 2;
+
+    gap: 8px;
+  }
+
+  .label {
+    max-width: calc(100% - 24px);
+    font-size: 10px;
+    letter-spacing: .06em;
+  }
+}
