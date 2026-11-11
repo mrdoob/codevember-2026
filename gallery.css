@@ -197,14 +197,16 @@ h1 {
   }
 
   .grid {
-    --columns: 2;
+    --columns: 3;
 
     gap: 8px;
   }
 
   .label {
-    max-width: calc(100% - 24px);
-    font-size: 10px;
-    letter-spacing: .06em;
+    max-width: calc(100% - 4px);
+    padding: 2px 4px;
+    font-size: clamp(9px, 2.5vw, 10px);
+    letter-spacing: 0;
+    white-space: nowrap;
   }
 }
