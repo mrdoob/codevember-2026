@@ -1,9 +1,27 @@
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+  --background: #f3f3f0;
+  --foreground: #141414;
+  --muted: #686865;
+  --placeholder: #e9e9e5;
+  --label-background: #141414;
+  --label-text: #fff;
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  color: #efefec;
-  background: #141414;
+  color: var(--foreground);
+  background: var(--background);
   font-synthesis: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --background: #141414;
+    --foreground: #efefec;
+    --muted: #888;
+    --placeholder: #181818;
+    --label-background: #fff;
+    --label-text: #141414;
+  }
 }
 
 * {
@@ -21,7 +39,7 @@ a {
 }
 
 a:focus-visible {
-  outline: 2px solid #efefec;
+  outline: 2px solid var(--foreground);
   outline-offset: 5px;
 }
 
@@ -53,7 +71,7 @@ h1 {
 }
 
 .byline {
-  color: #777;
+  color: var(--muted);
   font-size: .75em;
   letter-spacing: 0;
 }
@@ -63,7 +81,7 @@ h1 {
   top: var(--top-space);
   right: 0;
   margin: 0;
-  color: #888;
+  color: var(--muted);
   font-size: 10px;
   line-height: 20px;
   letter-spacing: .04em;
@@ -72,7 +90,7 @@ h1 {
 
 .prompt-credit a:hover,
 .byline a:hover {
-  color: #efefec;
+  color: var(--foreground);
 }
 
 /* Shared title and day labels */
@@ -80,8 +98,8 @@ h1 {
 .title-label,
 .label {
   padding: 2px 8px;
-  background: #fff;
-  color: #141414;
+  background: var(--label-background);
+  color: var(--label-text);
 }
 
 /* Gallery */
@@ -130,8 +148,8 @@ h1 {
 }
 
 .placeholder {
-  background: #181818;
-  color: #888;
+  background: var(--placeholder);
+  color: var(--muted);
 }
 
 .placeholder .label {

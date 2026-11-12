@@ -16,7 +16,7 @@ Open **http://localhost:8026/**. The gallery is plain HTML and CSS with no build
 
 `index.html` contains the day entries; `gallery.css` contains the layout and presentation. The grid uses eight columns on wide screens and adapts down to three on phones. Completed days link to their local folders. Future days are non-clickable placeholders with muted labels.
 
-Thumbnails live in `files/` as 800 × 800 WebP images, captured directly from the running experiments with their interfaces hidden. They display in full color. Day labels sit horizontally centered at 87.5% of the tile height. Completed-day labels and the title share a white background with 2px vertical and 8px horizontal padding; day labels use 4px horizontal padding on phones. Upcoming labels have no background.
+Thumbnails live in `files/` as 800 × 800 WebP images, captured directly from the running experiments with their interfaces hidden. They display in full color. Day labels sit horizontally centered at 87.5% of the tile height. The gallery follows the OS color preference through `prefers-color-scheme`: a light background with dark labels in light mode, and a dark background with white labels in dark mode. Completed-day labels and the title share 2px vertical and 8px horizontal padding; day labels use 4px horizontal padding on phones. Upcoming labels have no background.
 
 To add a day:
 
