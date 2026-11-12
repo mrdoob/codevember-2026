@@ -38,7 +38,7 @@ To add a day:
 | 08 | Tesseract | [View](https://mrdoob.github.io/codevember-2026/08/) | [Code](08/) |
 | 09 | Membrane | [View](https://mrdoob.github.io/codevember-2026/09/) | [Code](09/) |
 | 10 | Caustic | [View](https://mrdoob.github.io/codevember-2026/10/) | [Code](10/) |
-| 11 | Rust | — | — |
+| 11 | Rust | [View](https://mrdoob.github.io/codevember-2026/11/) | [Code](11/) |
 | 12 | Feather | — | — |
 | 13 | Labyrinth | — | — |
 | 14 | Tension | — | — |

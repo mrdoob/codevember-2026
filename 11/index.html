@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#041014" />
+    <meta
+      name="description"
+      content="Rust. A corroded underwater mine, tethered by a chain. Drag it upward until the iron gives way."
+    />
+    <title>Codevember 2026 / 11 / Rust</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "box3d.js/inline": "https://cdn.jsdelivr.net/npm/box3d.js@0.1.1/dist/box3d.inline.mjs",
+          "three": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.webgpu.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main>
+      <canvas
+        tabindex="0"
+        aria-label="Drag the rusty mine upward to tension and break its chain. Drag sideways to swing it."
+      ></canvas>
+    </main>
+    <header>
+      <span>CODEVEMBER 2026 / 11 / RUST</span>
+    </header>
+    <div id="status" role="status">Forging the iron…</div>
+    <script type="module" src="bootstrap.js"></script>
+  </body>
+</html>

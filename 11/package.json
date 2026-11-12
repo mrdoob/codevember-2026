@@ -1,0 +1,12 @@
+{
+  "name": "codevember-2026-rust",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "box3d.js": "0.1.1"
+  },
+  "scripts": {
+    "start": "python3 scripts/serve.py",
+    "test": "node --test tests/*.test.mjs"
+  }
+}
