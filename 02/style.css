@@ -1,9 +1,10 @@
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: #030814; color: #e4edf0; font: 11px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
 main { position: fixed; inset: 0; }
-canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; }
+canvas { display: block; width: 100%; height: 100%; touch-action: none; cursor: grab; outline: none; }
 canvas:active { cursor: grabbing; }
 header { position: fixed; z-index: 2; top: 24px; left: 28px; letter-spacing: .16em; pointer-events: none; }
+header a { color: inherit; text-decoration: none; pointer-events: auto; }
 header p { margin: 6px 0 0; color: #829fae; letter-spacing: normal; }
 #status { position: fixed; inset: 50% 20px auto; text-align: center; pointer-events: none; }
 .lil-gui.root { top: 20px; right: 28px; max-height: calc(100dvh - 110px); }

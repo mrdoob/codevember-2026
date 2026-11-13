@@ -262,7 +262,7 @@ try {
   });
   renderer.domElement.addEventListener('pointercancel', () => pointerStart = null);
   addEventListener('keydown', event => {
-    if (event.repeat || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.target.isContentEditable || /INPUT|SELECT|TEXTAREA|BUTTON/.test(event.target.tagName)) return;
+    if (event.repeat || event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.target.isContentEditable || event.target.closest('a[href]') || /INPUT|SELECT|TEXTAREA|BUTTON/.test(event.target.tagName)) return;
     // if (/^[a-z]$/i.test(event.key)) { event.preventDefault(); throwLetter(event.key); return; }
     if (event.code === 'Space') { event.preventDefault(); pause(); }
     else if (event.code === 'Enter') { event.preventDefault(); drop(); }
