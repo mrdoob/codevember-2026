@@ -2,7 +2,7 @@ import { Vector3 } from 'three/webgpu';
 import { color, screenUV, vec3, vec4, mix, cameraProjectionMatrixInverse, cameraWorldMatrix } from 'three/tsl';
 
 // Shared by the world-space sunset and the light illuminating the fibers.
-export const sunDirection = new Vector3(-.23, .105, -1).normalize();
+export const sunDirection = new Vector3(-.23, .16, -1).normalize();
 
 export function createLandscape(scene) {
   const clip = vec4(screenUV.x.mul(2).sub(1), screenUV.y.mul(-2).add(1), 1, 1);
