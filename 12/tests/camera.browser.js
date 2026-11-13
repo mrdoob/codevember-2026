@@ -1,6 +1,7 @@
 import { PerspectiveCamera, Vector3 } from 'three/webgpu';
 import { createCameraOrbit } from '../camera-orbit.js';
 import { CAMERA } from '../scene-constants.js';
+import { createSettings } from '../settings.js';
 
 // Exercise real DOM input handlers on an isolated canvas. Synthetic pointer
 // IDs have no browser capture, so only the capture calls are stubbed here.
@@ -11,7 +12,7 @@ export function checkCamera() {
   document.body.append(canvas);
   const classes = document.body.className;
   const camera = new PerspectiveCamera(CAMERA.fov, 4 / 3, CAMERA.near, CAMERA.far);
-  const settings = { autoOrbit: true, orbitSpeed: 1.2, paused: false, focus: CAMERA.radius };
+  const settings = createSettings();
   const orbit = createCameraOrbit(camera, canvas, () => {}, settings);
   const results = [];
   const check = (condition, label) => {
@@ -30,6 +31,18 @@ export function checkCamera() {
       'Opening altitude leaves room to drag downward');
     settle();
     check(camera.position.distanceTo(opening) > .1, 'Auto orbit runs before a drag');
+    check(settings.orbitSpeed === 6, 'Default auto orbit matches the 60-second video');
+    for (const fps of [30, 60, 120]) {
+      let angle = orbit.controls.getAzimuthalAngle(), total = 0;
+      for (let i = 0; i < 60 * fps; i++) {
+        orbit.update(1 / fps);
+        const next = orbit.controls.getAzimuthalAngle();
+        total += Math.atan2(Math.sin(next - angle), Math.cos(next - angle));
+        angle = next;
+      }
+      // Damping carries at most a fraction of a degree across cadence changes.
+      check(Math.abs(total - Math.PI * 2) < .02, `${fps} fps: one auto orbit per minute`);
+    }
     for (const pointerType of ['mouse', 'touch']) {
       orbit.reset(); settings.paused = false;
       settle();

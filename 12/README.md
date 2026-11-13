@@ -19,7 +19,7 @@ Open **http://localhost:8012/**. Python 3 serves the files. To browse the galler
 - **R** resets the feathers and camera. **H** hides the interface.
 - **Settings** controls wind, time, fall speed, auto orbit, lighting, subsurface scattering, focus, blur, bloom, saturation, and resolution.
 
-The camera starts at Y = −1.75 at a target distance of 6, with room to drag lower. Zoom spans 5–11 units, height spans −2.5–5, and the camera looks upward at a fixed 10° angle. Auto orbit runs at 1.2°/second and resumes after dragging. The vertical field of view is 40°, widening to 46° in portrait. Rendering uses the full device DPR by default, with explicit 1×, 1.5×, and 2× overrides. Reduced-motion preferences start the scene paused; hidden tabs stop advancing.
+The camera starts at Y = −1.75 at a target distance of 6, with room to drag lower. Zoom spans 5–11 units, height spans −2.5–5, and the camera looks upward at a fixed 10° angle. Auto orbit runs at 6°/second (one turn per minute) and resumes after dragging. The vertical field of view is 40°, widening to 46° in portrait. Rendering uses the full device DPR by default, with explicit 1×, 1.5×, and 2× overrides. Reduced-motion preferences start the scene paused; hidden tabs stop advancing.
 
 ## Scene and motion
 
@@ -63,3 +63,23 @@ await (await import('./tests/performance.browser.js')).checkPerformance();
 The checks cover native WebGPU/DPR, lighting on both feather faces, focused-edge isolation, near/far blur, environment occlusion, camera interactions, deterministic motion, and hidden feather recycling across 144 views. GPU checks verify anchored wind motion, finite meshlet bounds, and queue capacity. Coverage checks count actual planted stalks, and grounding checks raycast the rendered terrain at 37 model contact points. Performance sampling reports frame cadence across 16 views without a hardware-dependent pass threshold.
 
 `window.feather` exposes the scene, camera, renderer, materials, field, farm, post-processing, and controls for inspection. For deterministic captures, set `manual = true`, call `reset()` or `advance(dt)`, wait for `requestAnimationFrame`, then call `render()`. Restore `manual = false` afterward. Programmatic changes to wheat visibility or transforms require `wheat.group.needsUpdate = true`. Local experiment snapshots under `exports/` are excluded from version control.
+
+## Video capture
+
+The 60-second shot makes one full orbit at 6°/second while descending from Y = 5 to −2.5. The descent eases at both ends; orbit radius and viewing angle stay fixed. Feathers, wheat, and trees advance together at a fixed timestep. This is a continuous shot, not a seamless loop.
+
+Start the local experiment and a separate FFmpeg receiver (requires `ffmpeg` and `ffprobe` on PATH):
+
+```sh
+python3 scripts/capture-server.py --previews
+```
+
+In a fresh tab at **http://127.0.0.1:8012/**, use a 1024×1024 viewport with device scale 1. Wait for the scene to load, then run:
+
+```js
+await (await import('./scripts/capture-video.js')).captureVideo();
+```
+
+This renders 1,800 frames at 1536×1536, downsamples to 1024×1024, and encodes a silent 30 fps H.264 MP4 with the title and collapsed Settings label at √2 scale, matching the other days. PNG frames are acknowledged in order, so capture speed does not affect timing. The receiver verifies the decoded frame count, dimensions, frame rate, and duration before finalizing the output. Video, metadata, and optional preview frames go into ignored `exports/`; existing videos are never overwritten.
+
+`window.captureProgress` reports progress; call its `cancel()` method to abort. Capture resets the simulation, disables interaction, and restores the opening camera and prior settings afterward. Keep the capture tab visible and its viewport fixed. Preview a frame with `createCaptureSession().preview(frameIndex)` and call the session's `restore()` before starting a recording. Use `npm test` to check the capture path; the browser camera check also verifies orbit timing at 30, 60, and 120 fps.

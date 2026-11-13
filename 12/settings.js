@@ -2,7 +2,7 @@ import GUI from 'three/addons/libs/lil-gui.module.min.js';
 import { CAMERA } from './scene-constants.js';
 
 export function createSettings(reduced = false) {
-  return { breeze: 1, speed: 1, fallSpeed: 1, autoOrbit: true, orbitSpeed: 1.2, paused: reduced, exposure: 1.05, sunlight: 1, scattering: 1, aperture: 3.2, environmentBlur: true, focus: CAMERA.radius, bloom: .16, saturation: 1.08, resolution: 0 };
+  return { breeze: 1, speed: 1, fallSpeed: 1, autoOrbit: true, orbitSpeed: 6, paused: reduced, exposure: 1.05, sunlight: 1, scattering: 1, aperture: 3.2, environmentBlur: true, focus: CAMERA.radius, bloom: .16, saturation: 1.08, resolution: 0 };
 }
 export function createSettingsPanel(settings, actions) {
   const gui = new GUI({ title: 'Settings', width: 238 });
@@ -10,7 +10,7 @@ export function createSettingsPanel(settings, actions) {
   gui.add(settings, 'speed', .1, 2, .05).name('Time');
   gui.add(settings, 'fallSpeed', .2, 2, .05).name('Fall speed');
   gui.add(settings, 'autoOrbit').name('Auto orbit');
-  gui.add(settings, 'orbitSpeed', 0, 4, .1).name('Orbit speed (°/s)');
+  gui.add(settings, 'orbitSpeed', 0, 12, .1).name('Orbit speed (°/s)');
   gui.add(settings, 'paused').name('Pause').listen();
   gui.add(actions, 'gust').name('A passing gust');
   gui.add(actions, 'reset').name('Start again');
