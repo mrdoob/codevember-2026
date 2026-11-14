@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#101a2a" />
+    <meta name="description" content="Labyrinth. An endless winter night inside the snowbound hedge maze. A WebGPU experiment inspired by The Shining." />
+    <title>Codevember 2026 / 13 / Labyrinth</title>
+    <link rel="icon" href="data:," />
+    <link rel="stylesheet" href="style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.webgpu.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/gh/mrdoob/three.js@a70ee1ad92a681b7b8c42d23b6ede4febb28b25c/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main><canvas tabindex="0" aria-label="Snowy hedge maze. The camera follows the passage automatically until a key or touch takes control. WASD moves; up and down arrows move, left and right arrows turn. Mouse drag looks around during automatic flight or manual navigation. On touch, hold and drag one joystick to move and turn; release to hide it. Space pauses, R restarts the flight facing forward, H hides the header and settings, M shows the map. The audio toggle remains visible at the bottom left."></canvas></main>
+    <header><a href="https://mrdoob.github.io/codevember-2026/">CODEVEMBER 2026</a> / 13 / LABYRINTH</header>
+    <div id="status" role="status">Snow is settling in the hedges…</div>
+    <footer id="navigation" aria-label="Audio control">
+      <button id="sound-toggle" type="button" data-no-navigation aria-label="Enable music" aria-pressed="false">AUDIO OFF</button>
+    </footer>
+    <div id="joystick" role="group" aria-label="Touch joystick. Drag up or down to move and left or right to turn."><div id="joystick-thumb"></div></div>
+    <canvas id="map" aria-label="Maze plan and current camera position" hidden></canvas>
+    <script type="module" src="bootstrap.js"></script>
+  </body>
+</html>
